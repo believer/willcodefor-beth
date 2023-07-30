@@ -8,7 +8,7 @@ import { Post } from './components/post'
 import { Posts } from './components/posts'
 import { db } from './db'
 import { postViews, posts } from './db/schema'
-import { md } from './markdown'
+import { md } from './utils/markdown'
 import PostList from './components/postList'
 import Iteam from './components/iteam'
 
