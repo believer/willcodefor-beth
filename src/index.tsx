@@ -137,9 +137,24 @@ const app = new Elysia()
         },
         { params: t.Object({ slug: t.String() }) }
       )
-      .get(
+      .post(
         '/stats/:id',
-        async ({ html, params }) => {
+        async ({ html, params, headers }) => {
+          // Update views
+          if (
+            headers['user-agent'] &&
+            !headers['user-agent'].includes('Googlebot')
+          ) {
+            await db
+              .insert(postViews)
+              .values({
+                postId: Number(params.id),
+                userAgent: headers['user-agent'],
+              })
+              .run()
+          }
+
+          // Get views
           const stats = await db
             .select({
               count: sql`COUNT(*)`,

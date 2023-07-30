@@ -54,7 +54,7 @@ export function Post({
           ) : null}
           . It has been viewed{' '}
           <span
-            hx-get={`/posts/stats/${id}`}
+            hx-post={`/posts/stats/${id}`}
             hx-trigger="intersect"
             hx-swap="outerHTML"
           >
