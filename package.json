@@ -7,19 +7,8 @@
     "db:push": "bunx drizzle-kit push:sqlite",
     "db:studio": "bunx drizzle-kit studio",
     "dev": "concurrently \"bun run --watch src/index.tsx\" \"bun run tw:dev\"",
-    "tw": "bunx tailwindcss -i ./src/styles.css -o ./tailwind-gen/styles.css",
+    "tw": "bunx tailwindcss --minify --input ./src/styles.css --output ./tailwind-gen/styles.css",
     "tw:dev": "bunx tailwindcss -i ./src/styles.css -o ./tailwind-gen/styles.css --watch"
-  },
-  "devDependencies": {
-    "@flydotio/dockerfile": "latest",
-    "@tailwindcss/typography": "0.5.9",
-    "@types/markdown-it": "12.2.3",
-    "@types/markdown-it-link-attributes": "3.0.1",
-    "bun-types": "0.5.0",
-    "concurrently": "8.2.0",
-    "drizzle-kit": "0.19.9",
-    "prettier": "3.0.0",
-    "tailwindcss": "3.3.3"
   },
   "peerDependencies": {
     "typescript": "5.0.0"
@@ -36,5 +25,16 @@
     "markdown-it-anchor": "8.6.7",
     "markdown-it-highlightjs": "4.0.1",
     "markdown-it-link-attributes": "4.0.1"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "latest",
+    "@tailwindcss/typography": "0.5.9",
+    "@types/markdown-it": "12.2.3",
+    "@types/markdown-it-link-attributes": "3.0.1",
+    "bun-types": "0.5.0",
+    "concurrently": "8.2.0",
+    "drizzle-kit": "0.19.9",
+    "prettier": "3.0.0",
+    "tailwindcss": "3.3.3"
   }
 }

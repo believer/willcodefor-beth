@@ -24,6 +24,9 @@ RUN apt-get update -qq && \
 COPY --link bun.lockb package.json ./
 RUN bun install --ci
 
+# Create production build of Tailwind CSS
+RUN bun tw
+
 # Copy application code
 COPY --link . .
 
