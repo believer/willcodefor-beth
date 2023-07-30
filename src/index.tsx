@@ -328,7 +328,13 @@ app
       },
     })
   })
-  .get('/tokyonight.css', () => Bun.file('./src/tokyonight.css'))
+  .get('/tokyonight.css', () => {
+    return new Response(Bun.file('./public/tokyonight.css'), {
+      headers: {
+        'Cache-Control': 'max-age=31536000',
+      },
+    })
+  })
 
 // Static files
 app
