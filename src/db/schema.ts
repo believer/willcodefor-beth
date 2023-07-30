@@ -1,4 +1,4 @@
-import { InferModel, relations } from 'drizzle-orm'
+import { InferModel, relations, sql } from 'drizzle-orm'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const posts = sqliteTable('posts', {
@@ -11,8 +11,12 @@ export const posts = sqliteTable('posts', {
   series: text('series'),
   published: integer('published', { mode: 'boolean' }).notNull().default(false),
   tilId: integer('tilId', { mode: 'number' }),
-  createdAt: text('createdAt').notNull().default('now()'),
-  updatedAt: text('updatedAt').notNull().default('now()'),
+  createdAt: text('createdAt')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updatedAt')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const postsRelations = relations(posts, ({ many }) => ({
@@ -21,7 +25,9 @@ export const postsRelations = relations(posts, ({ many }) => ({
 
 export const postViews = sqliteTable('post_views', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  createdAt: text('createdAt').notNull().default('now()'),
+  createdAt: text('createdAt')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
   userAgent: text('userAgent').notNull(),
   postId: integer('postId'),
 })
