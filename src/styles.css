@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.hljs {
+  @apply !bg-transparent;
+}
+
+::selection {
+  @apply bg-pink-300 dark:bg-pink-600;
+}
+
+@layer base {
+  body {
+    @apply bg-white dark:bg-tokyoNight-bg dark:text-gray-200;
+  }
+
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  p {
+    @apply my-4;
+  }
+
+  p:not(:last-of-type) {
+    @apply mb-2;
+  }
+
+  h1 {
+    @apply mb-5 flex text-2xl font-semibold;
+  }
+
+  h2 {
+    @apply mb-5 text-lg font-semibold;
+  }
+
+  a {
+    @apply text-brandBlue-600 underline dark:text-tokyoNight-blue;
+  }
+
+  hr {
+    @apply my-4 border-gray-200 dark:border-gray-700;
+  }
+
+  abbr[title] {
+    @apply cursor-help border-b-2 border-dashed border-gray-400 no-underline;
+  }
+
+  /* Display the abbr title on mobile devices when clicked */
+  abbr[title]:focus::after,
+  abbr[title]:hover::after {
+    content: ' (' attr(title) ')';
+  }
+
+  /* Remove abbr display on hover devices */
+  @media (any-hover: hover) {
+    abbr[title]:hover::after {
+      content: '';
+    }
+  }
+}
+
+@layer components {
+  .markdown h2 {
+    @apply mt-10 mb-4 border-b border-gray-300 pb-4 font-medium text-gray-800 dark:border-gray-600 dark:text-gray-300;
+  }
+
+  .markdown h2:first-of-type {
+    @apply mt-0;
+  }
+
+  .markdown ul {
+    @apply ml-5;
+  }
+
+  .markdown li {
+    @apply list-disc;
+  }
+
+  .markdown li:not(:last-of-type) {
+    @apply mb-4;
+  }
+
+  .grid-post {
+    grid-template-columns: 1fr max-content;
+  }
+
+  .grid-template-main {
+    grid-template-columns: 20px 1fr minmax(auto, 900px) 1fr 20px;
+  }
+
+  .grid-search {
+    grid-template-columns: 1fr auto;
+  }
+
+  .list-item p a,
+  .markdown a {
+    @apply pb-0 text-blue-600 underline dark:text-blue-400;
+  }
+
+  .markdown a:hover {
+    @apply border-pink-300 bg-pink-300;
+  }
+
+  .til-counter::before {
+    @apply absolute -left-14 top-1/2 hidden w-12 -translate-y-1/2 text-right text-xs tabular-nums text-gray-500 dark:text-gray-400;
+
+    content: '#' attr(data-til) ': ';
+  }
+
+  /* SM */
+  @media (min-width: 640px) {
+    .grid-post {
+      grid-template-columns: max-content 1fr max-content;
+    }
+
+    .til-counter::before {
+      @apply block;
+    }
+  }
+
+  .hljs {
+    @apply !bg-transparent;
+  }
+
+  .counter {
+    counter-reset: section;
+  }
+
+  .counter-increment::before {
+    @apply w-12 text-right font-mono text-xs tabular-nums text-gray-600;
+
+    counter-increment: section;
+    content: '#' counter(section) ': ';
+  }
+}
