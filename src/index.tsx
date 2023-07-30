@@ -11,16 +11,7 @@ import { postViews, posts } from './db/schema'
 import { md } from './utils/markdown'
 import PostList from './components/postList'
 import Iteam from './components/iteam'
-
-const metadata = {
-  title: 'willcodefor.beer',
-  url: 'https://willcodefor.beer/',
-  description: 'Things I learn while browsing the web',
-  author: {
-    name: 'Rickard Natt och Dag',
-    email: 'rickard@willcodefor.dev',
-  },
-} as const
+import { generateFeed, generateSitemap } from './xml'
 
 const app = new Elysia()
   .use(html())
@@ -270,7 +261,7 @@ const app = new Elysia()
       )
   )
   .get('/feed.xml', async () => {
-    const feed = await db
+    const data = await db
       .select({
         body: posts.body,
         slug: posts.slug,
@@ -282,33 +273,9 @@ const app = new Elysia()
       .where(eq(posts.published, true))
       .all()
 
-    const xml = `<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <title>${metadata.title}</title>
-    <subtitle>${metadata.description}</subtitle>
-    <link href="${metadata.url}/feed.xml" rel="self"/>
-    <link href="${metadata.url}"/>
-    <updated>${feed.at(-1)?.updatedAt}</updated>
-    <id>${metadata.url}</id>
-    <author>
-        <name>${metadata.author.name}</name>
-        <email>${metadata.author.email}</email>
-    </author>
-    ${feed
-      .map(
-        (post) =>
-          `<entry>
-      <title>${post.title}</title>
-      <link href="${metadata.url}posts/${post.slug}"/>
-      <updated>${post.updatedAt}</updated>
-      <id>${metadata.url}posts/${post.slug}</id>
-      <content type="html">${md.render(post.body)}</content>
-    </entry>`
-      )
-      .join('')}
-</feed>`
+    const feed = generateFeed(data)
 
-    return new Response(xml, {
+    return new Response(feed, {
       status: 200,
       headers: {
         'Content-Type': 'application/xml',
@@ -316,7 +283,7 @@ const app = new Elysia()
     })
   })
   .get('/sitemap.xml', async () => {
-    const sitemap = await db
+    const data = await db
       .select({
         slug: posts.slug,
         updatedAt: posts.updatedAt,
@@ -326,20 +293,9 @@ const app = new Elysia()
       .where(eq(posts.published, true))
       .all()
 
-    const xml = `<?xml version="1.0" encoding="utf-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    ${sitemap
-      .map(
-        (post) =>
-          `<url>
-      <loc>${metadata.url}${post.slug}</loc>
-      <lastmod>${post.updatedAt}</lastmod>
-    </url>`
-      )
-      .join('')}
-</urlset>`
+    const sitemap = generateSitemap(data)
 
-    return new Response(xml, {
+    return new Response(sitemap, {
       status: 200,
       headers: {
         'Content-Type': 'application/xml',
