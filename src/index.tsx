@@ -329,7 +329,7 @@ app
     })
   })
   .get('/tokyonight.css', () => {
-    return new Response(Bun.file('./public/tokyonight.css'), {
+    return new Response(Bun.file('./tokyonight.css'), {
       headers: {
         'Cache-Control': 'max-age=31536000',
       },
