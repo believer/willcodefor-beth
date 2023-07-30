@@ -1,5 +1,5 @@
 import * as elements from 'typed-html'
-import { toYear, toYearShort } from '../intl'
+import { toYear, toYearShort } from '../utils/intl'
 
 const work = [
   {

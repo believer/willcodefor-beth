@@ -1,6 +1,6 @@
 import * as elements from 'typed-html'
 import { Post } from '../db/schema'
-import { formatDate, formatDateTime } from '../intl'
+import { formatDate, formatDateTime } from '../utils/intl'
 import { BaseHtml } from './layout'
 import Projects from './projects'
 import { GitHub, Twitter } from './socialMedia'

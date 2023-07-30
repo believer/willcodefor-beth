@@ -1,6 +1,6 @@
 import { Post } from '../db/schema'
 import * as elements from 'typed-html'
-import { formatDate, formatDateTime } from '../intl'
+import { formatDate, formatDateTime } from '../utils/intl'
 
 export type Sort = 'createdAt' | 'updatedAt' | 'views'
 

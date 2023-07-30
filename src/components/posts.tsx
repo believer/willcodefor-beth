@@ -1,8 +1,7 @@
-import { BaseHtml } from './layout'
-import { Post } from '../db/schema'
-import * as elements from 'typed-html'
 import clsx from 'clsx'
-import { formatDate, formatDateTime } from '../intl'
+import * as elements from 'typed-html'
+import { Post } from '../db/schema'
+import { BaseHtml } from './layout'
 import PostList, { Sort } from './postList'
 
 type Props = {

@@ -1,7 +1,7 @@
 import * as elements from 'typed-html'
 import { Post } from '../db/schema'
-import { formatDateTime } from '../intl'
-import { md } from '../markdown'
+import { formatDateTime } from '../utils/intl'
+import { md } from '../utils/markdown'
 import { BaseHtml } from './layout'
 
 export function Post({
