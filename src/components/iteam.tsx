@@ -1,4 +1,4 @@
-import * as elements from 'typed-html'
+import * as elements from '@kitajs/html'
 import { BaseHtml } from './layout'
 
 export default function Iteam() {

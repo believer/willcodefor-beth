@@ -1,13 +1,13 @@
-import * as elements from 'typed-html'
+import * as elements from '@kitajs/html'
 
 const SocialLink = ({
   children,
   color,
   href,
-}: elements.Children & {
+}: elements.PropsWithChildren<{
   color: string
   href: string
-}) => {
+}>) => {
   return (
     <a
       class={`flex items-center focus:outline-none rounded bg-gray-100 p-2 text-gray-700 ring-1 ring-transparent ring-offset-transparent transition-all hover:ring-2 hover:ring-gray-200 hover:ring-offset-2 dark:bg-gray-700 dark:hover:ring-gray-700 motion-reduce:transition-none hover:text-white dark:text-white focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 dark:focus:ring-gray-700 ${color}`}

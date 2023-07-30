@@ -1,4 +1,4 @@
-import * as elements from 'typed-html'
+import * as elements from '@kitajs/html'
 import { Post } from '../db/schema'
 import { formatDate, formatDateTime } from '../utils/intl'
 import { BaseHtml } from './layout'
@@ -22,7 +22,7 @@ export function Home({ latestPosts }: Props) {
             Hej! I'm a developer from Sweden. I enjoy making user-friendly
             websites and creating tools that make life easier for other
             developers. I currently love working in{' '}
-            <a href="https://rescript-lang.org/">ReScript</a> and{' '}
+            <a href="https://htmx.org/">htmx</a> and{' '}
             <a href="https://www.rust-lang.org/">Rust</a>.
           </header>
           <section class="mt-10 flex items-center space-x-6">

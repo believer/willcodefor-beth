@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import * as elements from 'typed-html'
+import * as elements from '@kitajs/html'
 import { Post } from '../db/schema'
 import { BaseHtml } from './layout'
 import PostList, { Sort } from './postList'

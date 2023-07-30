@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import * as elements from 'typed-html'
+import * as elements from '@kitajs/html'
 
 export const BaseHtml = ({
   children,
@@ -7,18 +7,18 @@ export const BaseHtml = ({
   noHeader = false,
   path,
   title,
-}: elements.Children & {
+}: elements.PropsWithChildren<{
   highlight?: boolean
   noHeader?: boolean
   path?: string
   title?: string
-}) => {
+}>) => {
   return (
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{title ?? 'willcodefor.beer'}</title>
+        <title>{title ?? 'Rickard Natt och Dag'}</title>
         <link href="/styles.css" rel="stylesheet" />
         {highlight ? '<link href="/tokyonight.css" rel="stylesheet" />' : ''}
       </head>

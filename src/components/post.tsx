@@ -1,4 +1,4 @@
-import * as elements from 'typed-html'
+import * as elements from '@kitajs/html'
 import { Post } from '../db/schema'
 import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'
@@ -43,16 +43,15 @@ export function Post({
           <time class="font-semibold" datetime={createdAt}>
             {formatDateTime(createdAt)}
           </time>
-          {createdAt !== updatedAt && (
+          {createdAt !== updatedAt ? (
             <span>
               {' '}
               and last modified{' '}
               <time class="font-semibold" datetime={updatedAt}>
-                {' '}
-                {formatDateTime(updatedAt)}{' '}
-              </time>{' '}
+                {formatDateTime(updatedAt)}
+              </time>
             </span>
-          )}
+          ) : null}
           . It has been viewed{' '}
           <span
             hx-get={`/posts/stats/${id}`}
