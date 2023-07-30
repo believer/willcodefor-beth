@@ -321,9 +321,33 @@ const app = new Elysia()
 
 // Styles
 app
-  .get('/styles.css', () => Bun.file('./tailwind-gen/styles.css'))
+  .get('/styles.css', () => {
+    return new Response(Bun.file('./tailwind-gen/styles.css'), {
+      headers: {
+        'Cache-Control': 'max-age=3600',
+      },
+    })
+  })
   .get('/tokyonight.css', () => Bun.file('./src/tokyonight.css'))
-  .get('/favicon.ico', () => Bun.file('./public/favicon.ico'))
+
+// Static files
+app
+  .get('/robots.txt', () => Bun.file('./public/robots.txt'))
+  .get('/humans.txt', () => Bun.file('./public/humans.txt'))
+  .get('/public/htmx.min.js', () => {
+    return new Response(Bun.file('./public/htmx.min.js'), {
+      headers: {
+        'Cache-Control': 'max-age=86400',
+      },
+    })
+  })
+  .get('/favicon.ico', () => {
+    return new Response(Bun.file('./public/favicon.ico'), {
+      headers: {
+        'Cache-Control': 'max-age=31536000',
+      },
+    })
+  })
 
 // Capture anything that's not handled
 // This should only mean handling short links to posts
