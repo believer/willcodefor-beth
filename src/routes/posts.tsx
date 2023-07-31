@@ -1,27 +1,49 @@
-import html from '@elysiajs/html'
+import { html as elysiaHtml } from '@elysiajs/html'
 import elements from '@kitajs/html'
 import { desc, eq, like, or, sql } from 'drizzle-orm'
 import { Elysia, t } from 'elysia'
 import { Post } from '../components/post'
-import PostList from '../components/postList'
 import { Posts } from '../components/posts'
 import { db } from '../db'
 import { postViews, posts } from '../db/schema'
 
 export default function (app: Elysia) {
-  return app.use(html()).group('/posts', (app) =>
+  return app.use(elysiaHtml()).group('/posts', (app) =>
     app
       .get(
         '',
         async ({ html, query }) => {
+          const commonValues = {
+            createdAt: posts.createdAt,
+            updatedAt: posts.updatedAt,
+            slug: posts.slug,
+            title: posts.title,
+            tilId: posts.tilId,
+          }
+
+          // TODO: Handle search and sort
+          // Handle searches
+          if (query.search) {
+            const data = await db
+              .select(commonValues)
+              .from(posts)
+              .where(
+                or(
+                  like(posts.title, `%${query.search}%`),
+                  like(posts.body, `%${query.search}%`)
+                )
+              )
+              .orderBy(desc(posts.createdAt))
+              .all()
+
+            return html(<Posts posts={data} search={query.search} />)
+          }
+
+          // Handled view sorting
           if (query.sort === 'views') {
             const data = await db
               .select({
-                createdAt: posts.createdAt,
-                updatedAt: posts.updatedAt,
-                slug: posts.slug,
-                title: posts.title,
-                tilId: posts.tilId,
+                ...commonValues,
                 views: sql<number>`COUNT("post_views".id) as views`,
               })
               .from(posts)
@@ -33,6 +55,7 @@ export default function (app: Elysia) {
             return html(<Posts posts={data} sort="views" />)
           }
 
+          // Handle date sorting
           let sortOrder = desc(posts.createdAt)
 
           if (query.sort === 'updatedAt') {
@@ -40,13 +63,7 @@ export default function (app: Elysia) {
           }
 
           const data = await db
-            .select({
-              createdAt: posts.createdAt,
-              updatedAt: posts.updatedAt,
-              slug: posts.slug,
-              title: posts.title,
-              tilId: posts.tilId,
-            })
+            .select(commonValues)
             .from(posts)
             .orderBy(sortOrder)
             .all()
@@ -55,6 +72,7 @@ export default function (app: Elysia) {
         },
         {
           query: t.Object({
+            search: t.Optional(t.String()),
             sort: t.Optional(
               t.Union([
                 t.Literal('views'),
@@ -62,34 +80,6 @@ export default function (app: Elysia) {
                 t.Literal('createdAt'),
               ])
             ),
-          }),
-        }
-      )
-      .post(
-        '/search',
-        async ({ html, body }) => {
-          const data = await db
-            .select({
-              createdAt: posts.createdAt,
-              updatedAt: posts.updatedAt,
-              slug: posts.slug,
-              title: posts.title,
-              tilId: posts.tilId,
-            })
-            .from(posts)
-            .where(
-              or(
-                like(posts.title, `%${body.search}%`),
-                like(posts.body, `%${body.search}%`)
-              )
-            )
-            .all()
-
-          return html(<PostList posts={data} />)
-        },
-        {
-          body: t.Object({
-            search: t.String(),
           }),
         }
       )
