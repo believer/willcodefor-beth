@@ -1,6 +1,8 @@
+import { desc, eq } from 'drizzle-orm'
 import { Elysia } from 'elysia'
-import { Post } from '../db/schema'
-import { md } from './markdown'
+import { db } from '../db'
+import { Post, posts } from '../db/schema'
+import { md } from '../utils/markdown'
 
 const metadata = {
   title: 'willcodefor.beer',
@@ -12,7 +14,7 @@ const metadata = {
   },
 } as const
 
-export const xml = () => (app: Elysia) =>
+const xml = () => (app: Elysia) =>
   app.derive((context) => ({
     xml(value: string) {
       return new Response(value, {
@@ -24,7 +26,7 @@ export const xml = () => (app: Elysia) =>
     },
   }))
 
-export function generateFeed(
+function generateFeed(
   feed: Pick<Post, 'title' | 'slug' | 'body' | 'updatedAt'>[]
 ) {
   return `<?xml version="1.0" encoding="utf-8"?>
@@ -54,7 +56,7 @@ export function generateFeed(
 </feed>`
 }
 
-export function generateSitemap(posts: Pick<Post, 'slug' | 'updatedAt'>[]) {
+function generateSitemap(posts: Pick<Post, 'slug' | 'updatedAt'>[]) {
   return `<?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     ${posts
@@ -67,4 +69,41 @@ export function generateSitemap(posts: Pick<Post, 'slug' | 'updatedAt'>[]) {
       )
       .join('')}
 </urlset>`
+}
+
+export default function (app: Elysia) {
+  return app
+    .use(xml())
+    .get('/feed.xml', async ({ xml }) => {
+      const data = await db
+        .select({
+          body: posts.body,
+          slug: posts.slug,
+          title: posts.title,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .orderBy(desc(posts.createdAt))
+        .where(eq(posts.published, true))
+        .all()
+
+      const feed = generateFeed(data)
+
+      return xml(feed)
+    })
+    .get('/sitemap.xml', async ({ xml }) => {
+      const data = await db
+        .select({
+          slug: posts.slug,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .orderBy(desc(posts.createdAt))
+        .where(eq(posts.published, true))
+        .all()
+
+      const sitemap = generateSitemap(data)
+
+      return xml(sitemap)
+    })
 }
