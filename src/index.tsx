@@ -12,6 +12,7 @@ import { md } from './utils/markdown'
 import PostList from './components/postList'
 import Iteam from './components/iteam'
 import { generateFeed, generateSitemap } from './xml'
+import { getFile } from './utils/file'
 
 const app = new Elysia()
   .use(html())
@@ -321,39 +322,23 @@ const app = new Elysia()
 
 // Styles
 app
-  .get('/styles.css', () => {
-    return new Response(Bun.file('./tailwind-gen/styles.css'), {
-      headers: {
-        'Cache-Control': 'max-age=3600',
-      },
-    })
-  })
-  .get('/tokyonight.css', () => {
-    return new Response(Bun.file('./src/tokyonight.css'), {
-      headers: {
-        'Cache-Control': 'max-age=31536000',
-      },
-    })
-  })
+  .get('/styles.css', () =>
+    getFile('./tailwind-gen/styles.css', { maxAge: 3600 })
+  )
+  .get('/tokyonight.css', () =>
+    getFile('./src/tokyonight.css', { maxAge: 31536000 })
+  )
 
 // Static files
 app
   .get('/robots.txt', () => Bun.file('./public/robots.txt'))
   .get('/humans.txt', () => Bun.file('./public/humans.txt'))
-  .get('/public/htmx.min.js', () => {
-    return new Response(Bun.file('./public/htmx.min.js'), {
-      headers: {
-        'Cache-Control': 'max-age=86400',
-      },
-    })
-  })
-  .get('/favicon.ico', () => {
-    return new Response(Bun.file('./public/favicon.ico'), {
-      headers: {
-        'Cache-Control': 'max-age=31536000',
-      },
-    })
-  })
+  .get('/public/htmx.min.js', () =>
+    getFile('./public/htmx.min.js', { maxAge: 86400 })
+  )
+  .get('/favicon.ico', () =>
+    getFile('./public/favicon.ico', { maxAge: 31536000 })
+  )
 
 // Capture anything that's not handled
 // This should only mean handling short links to posts
