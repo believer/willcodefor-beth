@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import * as elements from '@kitajs/html'
+import elements from '@kitajs/html'
 
 export const BaseHtml = ({
   children,

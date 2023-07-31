@@ -1,4 +1,4 @@
-import * as elements from '@kitajs/html'
+import elements from '@kitajs/html'
 import { toYear, toYearShort } from '../utils/intl'
 
 const work = [

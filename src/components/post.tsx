@@ -1,4 +1,4 @@
-import * as elements from '@kitajs/html'
+import elements from '@kitajs/html'
 import { Post } from '../db/schema'
 import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'

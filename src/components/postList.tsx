@@ -1,5 +1,5 @@
 import { Post } from '../db/schema'
-import * as elements from '@kitajs/html'
+import elements from '@kitajs/html'
 import { formatDate, formatDateTime } from '../utils/intl'
 
 export type Sort = 'createdAt' | 'updatedAt' | 'views'
