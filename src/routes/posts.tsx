@@ -108,11 +108,11 @@ export default function (app: Elysia) {
       .post(
         '/stats/:id',
         async ({ html, params, headers }) => {
+          const isProduction = process.env.NODE_ENV === 'production'
+          const isGoogleBot = headers['user-agent']?.includes('Googlebot')
+
           // Update views
-          if (
-            headers['user-agent'] &&
-            !headers['user-agent'].includes('Googlebot')
-          ) {
+          if (isProduction && headers['user-agent'] && !isGoogleBot) {
             await db
               .insert(postViews)
               .values({
@@ -133,7 +133,7 @@ export default function (app: Elysia) {
 
           return html(<span>{stats.count}</span>)
         },
-        { params: t.Object({ id: t.String() }) }
+        { params: t.Object({ id: t.Numeric() }) }
       )
       .get(
         '/next/:tilId',
