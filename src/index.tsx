@@ -11,11 +11,12 @@ import { postViews, posts } from './db/schema'
 import { md } from './utils/markdown'
 import PostList from './components/postList'
 import Iteam from './components/iteam'
-import { generateFeed, generateSitemap } from './xml'
+import { generateFeed, generateSitemap, xml } from './utils/xml'
 import { getFile } from './utils/file'
 
 const app = new Elysia()
   .use(html())
+  .use(xml())
   .use(staticPlugin())
   .get('/', async ({ html }) => {
     const latestPosts = await db
@@ -276,7 +277,11 @@ const app = new Elysia()
         }
       )
   )
-  .get('/feed.xml', async () => {
+  .get('/iteam', ({ html }) => html(<Iteam />))
+
+// XML Feeds
+app
+  .get('/feed.xml', async ({ xml }) => {
     const data = await db
       .select({
         body: posts.body,
@@ -291,14 +296,9 @@ const app = new Elysia()
 
     const feed = generateFeed(data)
 
-    return new Response(feed, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/xml',
-      },
-    })
+    return xml(feed)
   })
-  .get('/sitemap.xml', async () => {
+  .get('/sitemap.xml', async ({ xml }) => {
     const data = await db
       .select({
         slug: posts.slug,
@@ -311,14 +311,8 @@ const app = new Elysia()
 
     const sitemap = generateSitemap(data)
 
-    return new Response(sitemap, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/xml',
-      },
-    })
+    return xml(sitemap)
   })
-  .get('/iteam', ({ html }) => html(<Iteam />))
 
 // Styles
 app

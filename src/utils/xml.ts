@@ -1,5 +1,6 @@
-import { Post } from './db/schema'
-import { md } from './utils/markdown'
+import { Elysia } from 'elysia'
+import { Post } from '../db/schema'
+import { md } from './markdown'
 
 const metadata = {
   title: 'willcodefor.beer',
@@ -10,6 +11,18 @@ const metadata = {
     email: 'rickard@willcodefor.dev',
   },
 } as const
+
+export const xml = () => (app: Elysia) =>
+  app.derive((context) => ({
+    xml(value: string) {
+      return new Response(value, {
+        headers: {
+          ...context.set.headers,
+          'Content-Type': 'application/xml',
+        },
+      })
+    },
+  }))
 
 export function generateFeed(
   feed: Pick<Post, 'title' | 'slug' | 'body' | 'updatedAt'>[]
