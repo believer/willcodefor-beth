@@ -1,15 +1,15 @@
 # willcodefor
 
-To install dependencies:
+Inspired by [@ethanniser](https://github.com/ethanniser)'s [video on the BETH Stack](https://www.youtube.com/watch?v=cpzowDDJj24) running on the bleeding edge stack of:
 
-```bash
-bun install
-```
+- [Bun](https://bun.sh/)
+- [Elysia](https://elysiajs.com/)
+- [Turso](https://turso.tech/)
+- [htmx](https://htmx.org/)
 
-To run:
+I'm doing, yet another, rewrite of my personal website. I'll probably write a post about it later on.
 
-```bash
-bun run index.ts
-```
+## Previous iterations
 
-This project was created using `bun init` in bun v0.5.9. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+- Using [Remix](https://github.com/believer/willcodefor-remix)
+- Using [Eleventy (11ty)](https://github.com/believer/willcodefor.beer)
