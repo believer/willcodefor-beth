@@ -4,12 +4,15 @@ export function getFile(
   fileName: string,
   { maxAge }: { maxAge?: number } = {}
 ) {
+  const isProduction = process.env.NODE_ENV === 'production'
+
   return new Response(Bun.file(fileName), {
-    headers: maxAge
-      ? {
-          'Cache-Control': `max-age=${maxAge}`,
-        }
-      : {},
+    headers:
+      maxAge && isProduction
+        ? {
+            'Cache-Control': `max-age=${maxAge}`,
+          }
+        : {},
   })
 }
 
