@@ -24,11 +24,19 @@ export const BaseHtml = ({
             content="width=device-width, initial-scale=1.0"
           />
           <title>{title ?? 'Rickard Natt och Dag'}</title>
-          <link href="/styles.css" rel="stylesheet" />
-          {highlight ? '<link href="/tokyonight.css" rel="stylesheet" />' : ''}
+          <link href="/public/styles.css" rel="stylesheet" />
+          <link rel="icon" href="/public/favicon.ico" type="image/x-icon" />
+          {highlight
+            ? '<link href="/public/tokyonight.css" rel="stylesheet" />'
+            : ''}
         </head>
         <body class="bg-white dark:bg-tokyoNight-bg dark:text-gray-200">
-          <main class="grid-template-main grid py-5 md:px-8">
+          <main
+            class={clsx('grid py-5', {
+              'grid-template-main': path !== '/admin',
+              'grid-template-admin': path === '/admin',
+            })}
+          >
             {noHeader ? null : (
               <div class="col-start-3 col-end-4 flex flex-col space-y-2 border-b border-gray-200 pb-8 md:flex-row md:items-center md:justify-end md:space-y-0 md:space-x-8 md:border-0 md:pb-0">
                 <a

@@ -87,7 +87,11 @@
   }
 
   .grid-template-main {
-    grid-template-columns: 20px 1fr minmax(auto, 900px) 1fr 20px;
+    grid-template-columns: 2rem 1fr minmax(auto, 900px) 1fr 2rem;
+  }
+
+  .grid-template-admin {
+    grid-template-columns: 2rem 1fr minmax(auto, 1300px) 1fr 2rem;
   }
 
   .grid-search {
