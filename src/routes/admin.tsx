@@ -2,8 +2,8 @@ import { html } from '@elysiajs/html'
 import Elysia, { t } from 'elysia'
 import elements from '@kitajs/html'
 import { db } from '../db'
-import { posts } from '../db/schema'
-import { eq } from 'drizzle-orm'
+import { Post, posts } from '../db/schema'
+import { desc, eq, is } from 'drizzle-orm'
 import { BaseHtml } from '../components/layout'
 import { md } from '../utils/markdown'
 import { formatDateTime } from '../utils/intl'
@@ -36,19 +36,31 @@ export default function (app: Elysia) {
         .get('', async ({ html }) => {
           const allPosts = await db
             .select({
+              published: posts.published,
               title: posts.title,
               slug: posts.slug,
             })
             .from(posts)
+            .orderBy(desc(posts.createdAt))
             .all()
 
           return html(
             <BaseHtml noHeader>
               <h1>Admin</h1>
-              <ul>
+              <a href="/admin/new">New post</a>
+              <ul class="mt-8 space-y-2">
                 {allPosts.map((post) => (
-                  <li>
+                  <li class="flex gap-2 items-center">
                     <a href={`/admin/${post.slug}`}>{post.title}</a>
+                    {!post.published ? (
+                      <span class="text-xs text-gray-500">(draft)</span>
+                    ) : null}
+                    <button
+                      class="text-red-400"
+                      hx-delete={`/admin/${post.slug}`}
+                    >
+                      Delete
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -56,65 +68,188 @@ export default function (app: Elysia) {
           )
         })
         .get('/:slug', async ({ html, params }) => {
-          const post = await db
-            .select({
-              title: posts.title,
-              slug: posts.slug,
-              body: posts.body,
-              updatedAt: posts.updatedAt,
-            })
-            .from(posts)
-            .where(eq(posts.slug, params.slug))
-            .get()
+          let post = {
+            excerpt: '',
+            tilId: null,
+            longSlug: '',
+            title: '',
+            slug: params.slug,
+            body: '',
+            series: null,
+            published: false,
+          } as Post
+
+          const isNewPost = params.slug === 'new'
+
+          if (!isNewPost) {
+            post = await db
+              .select()
+              .from(posts)
+              .where(eq(posts.slug, params.slug))
+              .get()
+          }
+
+          const isDraft = !isNewPost && !post.published
 
           return html(
             <BaseHtml noHeader highlight>
-              <div class="my-12">
-                <div class="flex items-center justify-between">
-                  <a href="/admin">← Back</a>
+              <div class="flex items-center justify-between">
+                <a href="/admin">← Back</a>
+                {!isNewPost ? (
                   <span class="text-gray-500 dark:text-gray-600">
                     Last updated:{' '}
                     <span id="update-time">
                       {formatDateTime(post.updatedAt, 'medium')}
                     </span>
                   </span>
-                </div>
-                <form
-                  hx-post={`/admin/${post.slug}`}
-                  hx-trigger="every 30s"
-                  hx-target="#update-time"
-                >
-                  <input
-                    class="mt-8 mb-4 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                    type="text"
-                    name="title"
-                    value={post.title}
-                  />
-                  <div class="grid grid-cols-2 gap-10">
-                    <textarea
-                      class="rounded-sm border bg-transparent p-4 ring-blue-700 ring-offset-4 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                      name="body"
-                    >
-                      {post.body}
-                    </textarea>
-                    <div class="prose dark:prose-invert dark:prose-dark">
-                      {md.render(post.body)}
-                    </div>
-                  </div>
-                  <input type="text" name="slug" value={post.slug} />
-                </form>
+                ) : null}
               </div>
+              <form
+                action={isNewPost ? `/admin/${post.slug}` : undefined}
+                method={isNewPost ? 'POST' : undefined}
+                hx-patch={!isNewPost ? `/admin/${post.slug}` : undefined}
+                hx-trigger={
+                  isDraft
+                    ? 'submit, every 1m'
+                    : !isNewPost
+                    ? 'submit'
+                    : undefined
+                }
+                hx-target={!isNewPost ? '#update-time' : undefined}
+              >
+                <input
+                  class="mt-8 mb-4 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                  type="text"
+                  name="title"
+                  value={post.title}
+                  required="true"
+                />
+                <div class="grid grid-cols-2 gap-10">
+                  <textarea
+                    class="rounded-sm border bg-transparent p-4 ring-blue-700 ring-offset-4 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    name="body"
+                    required="true"
+                  >
+                    {post.body}
+                  </textarea>
+                  <div class="prose dark:prose-invert dark:prose-dark">
+                    {md.render(post.body)}
+                  </div>
+                </div>
+                <section class="mt-8 space-y-2">
+                  <header class="font-semibold text-lg">Metadata</header>
+                  <input
+                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    type="text"
+                    name="slug"
+                    placeholder="Slug"
+                    required="true"
+                    value={post.slug === 'new' ? '' : post.slug}
+                  />
+                  <input
+                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    name="longSlug"
+                    readonly="true"
+                    placeholder="Long Slug"
+                    type="text"
+                    value={post.longSlug}
+                  />
+                  <input
+                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    name="excerpt"
+                    placeholder="Excerpt"
+                    type="text"
+                    required="true"
+                    value={post.excerpt}
+                  />
+                  <input
+                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    name="tilId"
+                    readonly="true"
+                    placeholder="TIL ID"
+                    type="number"
+                    value={post.tilId?.toString()}
+                  />
+
+                  <input
+                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    type="text"
+                    name="series"
+                    placeholder="Series"
+                    value={post.series ?? ''}
+                  />
+                  <input
+                    type="checkbox"
+                    name="published"
+                    checked={post.published}
+                  />
+                </section>
+                <footer class="flex justify-end mt-4">
+                  <button class="px-4 py-2 bg-brandBlue-500">Save</button>
+                </footer>
+              </form>
             </BaseHtml>
           )
         })
         .post(
           '/:slug',
-          async ({ body }) => {
+          async ({ set, body, params }) => {
+            const isPublished = body.published === 'on'
+            const longSlug = body.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '')
+
+            const latestPost = await db
+              .select({
+                tilId: posts.tilId,
+              })
+              .from(posts)
+              .orderBy(desc(posts.createdAt))
+              .limit(1)
+              .get()
+
+            await db
+              .insert(posts)
+              .values({
+                ...body,
+                series: body.series !== '' ? body.series : null,
+                longSlug,
+                tilId: (latestPost.tilId ?? 0) + 1,
+                published: isPublished,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              })
+              .run()
+
+            set.redirect = `/admin/${body.slug}`
+          },
+          {
+            params: t.Object({
+              slug: t.String(),
+            }),
+            body: t.Object({
+              series: t.String(),
+              slug: t.String(),
+              title: t.String(),
+              body: t.String(),
+              published: t.Optional(t.Literal('on')),
+              tilId: t.Optional(t.String()),
+              excerpt: t.String(),
+              longSlug: t.Optional(t.String()),
+            }),
+          }
+        )
+        .patch(
+          '/:slug',
+          async ({ set, body }) => {
+            const isPublished = body.published === 'on'
+
             await db
               .update(posts)
               .set({
-                title: body.title,
-                body: body.body,
+                ...body,
+                published: isPublished,
                 updatedAt: new Date().toISOString(),
               })
               .where(eq(posts.slug, body.slug))
@@ -127,9 +262,31 @@ export default function (app: Elysia) {
           },
           {
             body: t.Object({
+              series: t.String(),
               slug: t.String(),
               title: t.String(),
               body: t.String(),
+              published: t.Optional(t.Literal('on')),
+              tilId: t.Optional(t.String()),
+              excerpt: t.String(),
+              longSlug: t.Optional(t.String()),
+            }),
+          }
+        )
+        .delete(
+          '/:slug',
+          async ({ params }) => {
+            await db.delete(posts).where(eq(posts.slug, params.slug)).run()
+
+            return new Response(null, {
+              headers: {
+                'HX-Redirect': '/admin',
+              },
+            })
+          },
+          {
+            params: t.Object({
+              slug: t.String(),
             }),
           }
         )
