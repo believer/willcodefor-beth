@@ -10,7 +10,7 @@ export const posts = sqliteTable(
     excerpt: text('excerpt').notNull(),
     slug: text('slug').notNull().unique(),
     longSlug: text('longSlug').notNull().unique(),
-    series: text('series'),
+    series: text('series').default(sql`NULL`),
     published: integer('published', { mode: 'boolean' })
       .notNull()
       .default(false),
