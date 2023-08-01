@@ -1,6 +1,6 @@
 import { html as elysiaHtml } from '@elysiajs/html'
 import elements from '@kitajs/html'
-import { desc, eq, like, or, sql } from 'drizzle-orm'
+import { and, desc, eq, like, or, sql } from 'drizzle-orm'
 import { Elysia, t } from 'elysia'
 import { Post } from '../components/post'
 import { Posts } from '../components/posts'
@@ -29,9 +29,12 @@ export default function (app: Elysia) {
               .select(commonValues)
               .from(posts)
               .where(
-                or(
-                  like(posts.title, `%${query.search}%`),
-                  like(posts.body, `%${query.search}%`)
+                and(
+                  or(
+                    like(posts.title, `%${query.search}%`),
+                    like(posts.body, `%${query.search}%`)
+                  ),
+                  eq(posts.published, true)
                 )
               )
               .orderBy(desc(posts.createdAt))
@@ -51,6 +54,7 @@ export default function (app: Elysia) {
               .innerJoin(postViews, eq(postViews.postId, posts.id))
               .groupBy(posts.id)
               .orderBy(desc(sql`views`))
+              .where(eq(posts.published, true))
               .all()
 
             return html(<Posts posts={data} sort="views" />)
@@ -67,6 +71,7 @@ export default function (app: Elysia) {
             .select(commonValues)
             .from(posts)
             .orderBy(sortOrder)
+            .where(eq(posts.published, true))
             .all()
 
           return html(<Posts posts={data} sort={query.sort} />)
@@ -116,7 +121,9 @@ export default function (app: Elysia) {
               title: posts.title,
             })
             .from(posts)
-            .where(eq(posts.series, params.series))
+            .where(
+              and(eq(posts.series, params.series), eq(posts.published, true))
+            )
             .orderBy(desc(posts.createdAt))
             .all()
 
@@ -170,7 +177,9 @@ export default function (app: Elysia) {
               title: posts.title,
             })
             .from(posts)
-            .where(eq(posts.tilId, Number(params.tilId) + 1))
+            .where(
+              and(eq(posts.tilId, params.tilId + 1), eq(posts.published, true))
+            )
             .get()
 
           if (!nextPost) {
@@ -184,7 +193,7 @@ export default function (app: Elysia) {
           )
         },
         {
-          params: t.Object({ tilId: t.String() }),
+          params: t.Object({ tilId: t.Numeric() }),
         }
       )
       .get(
@@ -196,7 +205,9 @@ export default function (app: Elysia) {
               title: posts.title,
             })
             .from(posts)
-            .where(eq(posts.tilId, Number(params.tilId) - 1))
+            .where(
+              and(eq(posts.tilId, params.tilId - 1), eq(posts.published, true))
+            )
             .get()
 
           if (!previousPost) {
@@ -210,7 +221,7 @@ export default function (app: Elysia) {
           )
         },
         {
-          params: t.Object({ tilId: t.String() }),
+          params: t.Object({ tilId: t.Numeric() }),
         }
       )
   )

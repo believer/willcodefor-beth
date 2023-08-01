@@ -1,5 +1,5 @@
 import elements from '@kitajs/html'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import Elysia from 'elysia'
 import { Home } from '../components/home'
 import { db } from '../db'
@@ -17,6 +17,7 @@ export default function (app: Elysia) {
       })
       .from(posts)
       .orderBy(desc(posts.createdAt))
+      .where(eq(posts.published, true))
       .limit(5)
       .all()
 
