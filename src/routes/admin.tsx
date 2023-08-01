@@ -92,7 +92,7 @@ export default function (app: Elysia) {
           const isDraft = !isNewPost && !post.published
 
           return html(
-            <BaseHtml noHeader highlight>
+            <BaseHtml noHeader highlight path="/admin">
               <div class="flex items-center justify-between">
                 <a href="/admin">← Back</a>
                 {!isNewPost ? (
@@ -118,7 +118,7 @@ export default function (app: Elysia) {
                 hx-target={!isNewPost ? '#update-time' : undefined}
               >
                 <input
-                  class="mt-8 mb-4 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                  class="my-8 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                   type="text"
                   name="title"
                   value={post.title}
@@ -129,10 +129,16 @@ export default function (app: Elysia) {
                     class="rounded-sm border bg-transparent p-4 ring-blue-700 ring-offset-4 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                     name="body"
                     required="true"
+                    hx-get="/admin/preview"
+                    hx-target="#preview"
+                    hx-trigger="keyup changed delay:500ms"
                   >
                     {post.body}
                   </textarea>
-                  <div class="prose dark:prose-invert dark:prose-dark">
+                  <div
+                    class="prose dark:prose-invert dark:prose-dark"
+                    id="preview"
+                  >
                     {md.render(post.body)}
                   </div>
                 </div>
@@ -242,7 +248,7 @@ export default function (app: Elysia) {
         )
         .patch(
           '/:slug',
-          async ({ set, body }) => {
+          async ({ body }) => {
             const isPublished = body.published === 'on'
 
             await db
@@ -287,6 +293,17 @@ export default function (app: Elysia) {
           {
             params: t.Object({
               slug: t.String(),
+            }),
+          }
+        )
+        .get(
+          '/preview',
+          async ({ query }) => {
+            return md.render(query.body)
+          },
+          {
+            query: t.Object({
+              body: t.String(),
             }),
           }
         )
