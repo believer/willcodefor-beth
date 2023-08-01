@@ -4,6 +4,11 @@ import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'
 import { BaseHtml } from './layout'
 
+type Props = Pick<
+  Post,
+  'id' | 'body' | 'title' | 'tilId' | 'updatedAt' | 'createdAt' | 'series'
+>
+
 export function Post({
   body,
   createdAt,
@@ -11,18 +16,28 @@ export function Post({
   tilId,
   title,
   updatedAt,
-}: Pick<Post, 'id' | 'body' | 'title' | 'tilId' | 'updatedAt' | 'createdAt'>) {
+  series,
+}: Props) {
   return (
     <BaseHtml title={title} highlight path="/posts">
-      <article class="mx-auto max-w-prose prose dark:prose-invert dark:prose-dark">
-        <h1 class="mb-5 flex text-2xl">
-          <span class="not-prose font-medium">
-            <a href="/">til</a>
-          </span>
-          <span class="mx-1 font-normal text-gray-400">/</span>
-          <span>{title}</span>
-        </h1>
-        <div id="body">{md.render(body ?? '')}</div>
+      <section class="mx-auto max-w-prose">
+        <article class="prose dark:prose-invert dark:prose-dark">
+          <h1 class="mb-5 flex text-2xl">
+            <span class="not-prose font-medium">
+              <a href="/">til</a>
+            </span>
+            <span class="mx-1 font-normal text-gray-400">/</span>
+            <span>{title}</span>
+          </h1>
+          <div id="body">{md.render(body ?? '')}</div>
+        </article>
+        {series ? (
+          <div
+            hx-get={`/posts/series/${series}?title=${title}`}
+            hx-trigger="load"
+            hx-swap="outerHTML"
+          />
+        ) : null}
         <hr />
         <ul class="flex flex-col items-center justify-between gap-5 space-y-3 text-sm sm:flex-row sm:space-y-0">
           <div
@@ -62,7 +77,7 @@ export function Post({
           </span>{' '}
           times. CC BY-NC-SA 4.0 2023-PRESENT © Rickard Natt och Dag
         </footer>
-      </article>
+      </section>
     </BaseHtml>
   )
 }

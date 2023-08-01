@@ -5,7 +5,8 @@ import { Elysia, t } from 'elysia'
 import { Post } from '../components/post'
 import { Posts } from '../components/posts'
 import { db } from '../db'
-import { postViews, posts } from '../db/schema'
+import { postViews, posts, Post as PostType } from '../db/schema'
+import { Series } from '../components/series'
 
 export default function (app: Elysia) {
   return app.use(elysiaHtml()).group('/posts', (app) =>
@@ -94,6 +95,7 @@ export default function (app: Elysia) {
               tilId: posts.tilId,
               title: posts.title,
               updatedAt: posts.updatedAt,
+              series: posts.series,
             })
             .from(posts)
             .where(
@@ -104,6 +106,30 @@ export default function (app: Elysia) {
           return html(<Post {...post} />)
         },
         { params: t.Object({ slug: t.String() }) }
+      )
+      .get(
+        '/series/:series',
+        async ({ html, params, query }) => {
+          const series = await db
+            .select({
+              slug: posts.slug,
+              title: posts.title,
+            })
+            .from(posts)
+            .where(eq(posts.series, params.series))
+            .orderBy(desc(posts.createdAt))
+            .all()
+
+          return html(
+            <Series posts={series} series={params.series} title={query.title} />
+          )
+        },
+        {
+          params: t.Object({ series: t.String() }),
+          query: t.Object({
+            title: t.String(),
+          }),
+        }
       )
       .post(
         '/stats/:id',
