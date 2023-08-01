@@ -6,6 +6,10 @@ export declare global {
       property?: string
     }
 
+    interface HtmlScriptTag extends HtmlScriptTag {
+      referrerpolicy?: string
+    }
+
     interface IntrinsicElements {
       path: HtmlPathTag
     }
