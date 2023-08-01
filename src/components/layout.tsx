@@ -7,11 +7,13 @@ export const BaseHtml = ({
   noHeader = false,
   path,
   title,
+  meta = null,
 }: elements.PropsWithChildren<{
   highlight?: boolean
   noHeader?: boolean
   path?: string
   title?: string
+  meta: string | null
 }>) => {
   return (
     '<!DOCTYPE html>' +
@@ -23,7 +25,20 @@ export const BaseHtml = ({
             name="viewport"
             content="width=device-width, initial-scale=1.0"
           />
+          <meta name="keywords" content="blog,today i learned" />
+          <meta name="author" content="Rickard Natt och Dag" />
+          {meta ? (
+            meta
+          ) : (
+            <>
+              <meta
+                name="description"
+                content="I am a developer from Sweden. I enjoy making user-friendly websites and creating tools that make life easier for other developers."
+              />
+            </>
+          )}
           <title>{title ?? 'Rickard Natt och Dag'}</title>
+
           <link href="/public/styles.css" rel="stylesheet" />
           <link rel="icon" href="/public/favicon.ico" type="image/x-icon" />
           {highlight

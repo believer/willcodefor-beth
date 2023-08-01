@@ -101,6 +101,7 @@ export default function (app: Elysia) {
               title: posts.title,
               updatedAt: posts.updatedAt,
               series: posts.series,
+              excerpt: posts.excerpt,
             })
             .from(posts)
             .where(
@@ -108,7 +109,7 @@ export default function (app: Elysia) {
             )
             .get()
 
-          return html(<Post {...post} />)
+          return html(<Post {...post} slug={params.slug} />)
         },
         { params: t.Object({ slug: t.String() }) }
       )

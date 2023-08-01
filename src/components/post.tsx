@@ -6,20 +6,53 @@ import { BaseHtml } from './layout'
 
 type Props = Pick<
   Post,
-  'id' | 'body' | 'title' | 'tilId' | 'updatedAt' | 'createdAt' | 'series'
+  | 'id'
+  | 'body'
+  | 'excerpt'
+  | 'title'
+  | 'tilId'
+  | 'updatedAt'
+  | 'createdAt'
+  | 'series'
+  | 'slug'
 >
 
 export function Post({
   body,
   createdAt,
+  excerpt,
   id,
   tilId,
   title,
   updatedAt,
   series,
+  slug,
 }: Props) {
   return (
-    <BaseHtml title={title} highlight path="/posts">
+    <BaseHtml
+      title={title}
+      highlight
+      path="/posts"
+      meta={
+        <>
+          <meta name="description" content={excerpt} />
+          <meta property="og:title" content={title} />
+          <meta property="og:type" content="article" />
+          <meta
+            property="og:url"
+            content={`https://willcodefor.beer/${slug}`}
+          />
+          <meta
+            property="og:image"
+            content="https://willcodefor.beer/public/ogimage.png"
+          />
+          <meta property="og:description" content={excerpt} />
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:site" content="@rnattochdag" />
+          <meta name="twitter:creator" content="@rnattochdag" />
+        </>
+      }
+    >
       <section class="mx-auto max-w-prose">
         <article class="prose dark:prose-invert dark:prose-dark">
           <h1 class="mb-5 flex text-2xl">
