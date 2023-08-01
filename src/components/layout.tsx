@@ -13,7 +13,7 @@ export const BaseHtml = ({
   noHeader?: boolean
   path?: string
   title?: string
-  meta: string | null
+  meta?: string | null
 }>) => {
   return (
     '<!DOCTYPE html>' +
