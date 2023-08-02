@@ -40,10 +40,10 @@ export function Home({ latestPosts }: Props) {
 
         <div class="col-span-12 md:col-span-10">
           <p class="mt-0">
-            Here are interesting things I found while browsing the web. It's
-            ideas and thoughts, new findings, and reminders regarding software
-            development. I see it as a second brain for all things related to
-            development and a way for me to practice{' '}
+            Today I Learned (TIL) are interesting things I've found on the web,
+            ideas, thoughts, and reminders regarding software development. I see
+            it as a second brain for all things related to development and a way
+            for me to practice{' '}
             <a href="/posts/learning-in-public">Learning in public</a>.
           </p>
 
