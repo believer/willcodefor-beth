@@ -24,13 +24,15 @@
     "markdown-it": "13.0.1",
     "markdown-it-anchor": "8.6.7",
     "markdown-it-highlightjs": "4.0.1",
-    "markdown-it-link-attributes": "4.0.1"
+    "markdown-it-link-attributes": "4.0.1",
+    "ua-parser-js": "^1.0.35"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "latest",
     "@tailwindcss/typography": "0.5.9",
     "@types/markdown-it": "12.2.3",
     "@types/markdown-it-link-attributes": "3.0.1",
+    "@types/ua-parser-js": "^0.7.36",
     "bun-types": "0.7.1",
     "concurrently": "8.2.0",
     "drizzle-kit": "0.19.12",
