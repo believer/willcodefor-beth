@@ -10,7 +10,10 @@ export declare global {
       referrerpolicy?: string
     }
 
+    interface HtmlDialogTag extends HtmlTag {}
+
     interface IntrinsicElements {
+      dialog: HtmlDialogTag
       path: HtmlPathTag
     }
   }

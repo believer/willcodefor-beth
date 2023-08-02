@@ -1,26 +1,132 @@
+import html from '@elysiajs/html'
 import elements from '@kitajs/html'
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq, like } from 'drizzle-orm'
 import Elysia from 'elysia'
 import { Home } from '../components/home'
 import { db } from '../db'
 import { posts } from '../db/schema'
-import html from '@elysiajs/html'
 
 export default function (app: Elysia) {
-  return app.use(html()).get('/', async ({ html }) => {
-    const latestPosts = await db
-      .select({
-        createdAt: posts.createdAt,
-        slug: posts.slug,
-        tilId: posts.tilId,
-        title: posts.title,
-      })
-      .from(posts)
-      .orderBy(desc(posts.createdAt))
-      .where(eq(posts.published, true))
-      .limit(5)
-      .all()
+  return app
+    .use(html())
+    .get('/', async ({ html }) => {
+      const latestPosts = await db
+        .select({
+          createdAt: posts.createdAt,
+          slug: posts.slug,
+          tilId: posts.tilId,
+          title: posts.title,
+        })
+        .from(posts)
+        .orderBy(desc(posts.createdAt))
+        .where(eq(posts.published, true))
+        .limit(5)
+        .all()
 
-    return html(<Home latestPosts={latestPosts} />)
-  })
+      return html(<Home latestPosts={latestPosts} />)
+    })
+    .group('/command-menu', (app) =>
+      app
+        .get('/open', async ({ html }) => {
+          const data = await db
+            .select({
+              slug: posts.slug,
+              title: posts.title,
+            })
+            .from(posts)
+            .orderBy(desc(posts.createdAt))
+            .where(eq(posts.published, true))
+            .limit(5)
+            .all()
+
+          return html(
+            <>
+              <div
+                id="command-menu"
+                class="bg-gray-900/70 fixed inset-0 flex justify-center items-center"
+                hx-get="/command-menu/close"
+                hx-trigger="keyup[ctrlKey && key == 'k'] from:body, keyup[key == 'Escape'] from:body"
+                hx-swap="outerHTML"
+              >
+                <div class="w-[80dvw] md:w-[60dvw] lg:w-[40dvw] rounded shadow-lg bg-tokyoNight-bg p-6 border-gray-800">
+                  <input
+                    autofocus="true"
+                    type="text"
+                    name="search"
+                    class="mb-4 block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    placeholder="Search"
+                    hx-trigger="keyup changed delay:300ms"
+                    hx-get="/command-menu/search"
+                    hx-target="#command-menu-posts"
+                    hx-swap="innerHTML"
+                  />
+                  <div>
+                    <ul id="command-menu-posts">
+                      {data.map((post, i) => (
+                        <li class="flex justify-between items-center focus-within:bg-gray-800 p-2 -mx-2 rounded-sm">
+                          <a
+                            class="focus:outline-none"
+                            href={`/posts/${post.slug}`}
+                            hx-trigger={`click, keyup[ctrlKey && key == ${
+                              i + 1
+                            }] from:body`}
+                          >
+                            {post.title}
+                          </a>
+                          <div class="text-xs text-gray-700">
+                            (ctrl + {i + 1})
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </>
+          )
+        })
+        .get('/search', async ({ html, query }) => {
+          const data = await db
+            .select({
+              slug: posts.slug,
+              title: posts.title,
+            })
+            .from(posts)
+            .orderBy(desc(posts.createdAt))
+            .where(
+              and(
+                eq(posts.published, true),
+                like(posts.title, `%${query.search}%`)
+              )
+            )
+            .limit(5)
+            .all()
+
+          return html(
+            data.map((post, i) => (
+              <li class="flex justify-between items-center focus-within:bg-gray-800 p-2 -mx-2 rounded-sm">
+                <a
+                  class="focus:outline-none"
+                  href={`/posts/${post.slug}`}
+                  hx-trigger={`click, keyup[ctrlKey && key == ${
+                    i + 1
+                  }] from:body`}
+                >
+                  {post.title}
+                </a>
+                <div class="text-xs text-gray-700">(ctrl + {i + 1})</div>
+              </li>
+            ))
+          )
+        })
+        .get('/close', async ({ html }) => {
+          return html(
+            <div
+              hx-get="/command-menu/open"
+              hx-trigger="keyup[ctrlKey && key == 'k'] from:body"
+              hx-swap="outerHTML"
+            />
+          )
+        })
+    )
 }

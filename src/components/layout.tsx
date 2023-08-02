@@ -81,6 +81,11 @@ export const BaseHtml = ({
               {children}
             </div>
           </main>
+          <div
+            hx-get="/command-menu/open"
+            hx-trigger="keyup[ctrlKey && key == 'k'] from:body"
+            hx-swap="outerHTML"
+          />
         </body>
       </html>
     )
