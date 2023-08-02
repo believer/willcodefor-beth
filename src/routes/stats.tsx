@@ -2,13 +2,12 @@ import html from '@elysiajs/html'
 import elements from '@kitajs/html'
 import { eq, gt, sql } from 'drizzle-orm'
 import Elysia, { t } from 'elysia'
+import userAgentParser from 'ua-parser-js'
+import { DataList } from '../components/datalist'
 import { BaseHtml } from '../components/layout'
 import PostList from '../components/postList'
 import { db } from '../db'
 import { postViews, posts } from '../db/schema'
-import userAgentParser from 'ua-parser-js'
-import { parsePercent } from '../utils/intl'
-import { DataList } from '../components/datalist'
 
 export default function (app: Elysia) {
   return app.use(html()).group('/stats', (app) =>
@@ -174,7 +173,8 @@ GROUP BY 1
             .innerJoin(posts, eq(posts.id, postViews.postId))
             .groupBy(posts.id)
             .orderBy(sql`count DESC`)
-            .limit(10 * page)
+            .offset(10 * (page - 1))
+            .limit(10)
             .all()
 
           const postsWithViews = await db
@@ -189,22 +189,12 @@ GROUP BY 1
 
           return html(
             <div id="most-viewed">
-              <PostList posts={data} sort="views" />
-              <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                {postsWithViews.length} posts with views
-              </div>
-
-              {hasMore ? (
-                <div class="mt-8 flex justify-center">
-                  <button
-                    class="hover: rounded border border-gray-500 bg-gray-200 bg-opacity-25 px-4 py-2 text-center text-xs font-bold uppercase text-gray-500 no-underline transition-colors hover:border-brandBlue-500 hover:bg-brandBlue-300 hover:bg-opacity-25 hover:text-brandBlue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 hover:dark:border-brandBlue-700 hover:dark:bg-brandBlue-500 hover:dark:text-brandBlue-100"
-                    hx-get={`/stats/most-viewed?page=${page + 1}`}
-                    hx-target="#most-viewed"
-                  >
-                    Load more
-                  </button>
-                </div>
-              ) : null}
+              <PostList
+                posts={data}
+                sort="views"
+                hasMore={hasMore}
+                page={page}
+              />
             </div>
           )
         },
@@ -269,13 +259,9 @@ GROUP BY 1
           Object.entries(os).sort((a, b) => b[1] - a[1])
         )
 
-        const sumOs = Object.values(os).reduce((a, b) => a + b, 0)
-
         const sortedBrowser = Object.fromEntries(
           Object.entries(browser).sort((a, b) => b[1] - a[1])
         )
-
-        const sumBrowser = Object.values(browser).reduce((a, b) => a + b, 0)
 
         return html(
           <>

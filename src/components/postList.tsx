@@ -1,17 +1,24 @@
-import { Post } from '../db/schema'
 import elements from '@kitajs/html'
+import { Post } from '../db/schema'
 import { formatDate, formatDateTime } from '../utils/intl'
 
 export type Sort = 'createdAt' | 'updatedAt' | 'views'
 
 type Props = {
+  hasMore?: boolean
   sort?: Sort
+  page?: number
   posts: (Pick<Post, 'slug' | 'title' | 'tilId' | 'createdAt' | 'updatedAt'> & {
     views?: number
   })[]
 }
 
-export default function PostList({ posts, sort = 'createdAt' }: Props) {
+export default function PostList({
+  posts,
+  sort = 'createdAt',
+  hasMore,
+  page,
+}: Props) {
   if (posts.length === 0) {
     return (
       <div class="text-center">
@@ -49,6 +56,21 @@ export default function PostList({ posts, sort = 'createdAt' }: Props) {
           </li>
         )
       })}
+      {hasMore && page ? (
+        <li>
+          <div class="mt-8 flex justify-center">
+            <button
+              class="hover: rounded border border-gray-500 bg-gray-200 bg-opacity-25 px-4 py-2 text-center text-xs font-bold uppercase text-gray-500 no-underline transition-colors hover:border-brandBlue-500 hover:bg-brandBlue-300 hover:bg-opacity-25 hover:text-brandBlue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 hover:dark:border-brandBlue-700 hover:dark:bg-brandBlue-500 hover:dark:text-brandBlue-100"
+              hx-get={`/stats/most-viewed?page=${page + 1}`}
+              hx-target="closest li"
+              hx-swap="outerHTML"
+              hx-select="ol > li"
+            >
+              Load more
+            </button>
+          </div>
+        </li>
+      ) : null}
     </ol>
   )
 }
