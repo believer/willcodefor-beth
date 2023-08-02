@@ -56,7 +56,7 @@ export function Post({
         <article class="prose dark:prose-invert dark:prose-dark">
           <h1 class="mb-5 flex text-2xl">
             <span class="not-prose font-medium">
-              <a href="/">til</a>
+              <a href="/posts">til</a>
             </span>
             <span class="mx-1 font-normal text-gray-400">/</span>
             <span>{title}</span>
