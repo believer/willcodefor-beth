@@ -27,9 +27,17 @@ const app = new Elysia()
   .get('/iteam', ({ html }) => html(<Iteam />))
   // Static files
   .use(staticRoutes)
-  // Capture anything that's not handled
-  // This should only mean handling short links to posts
   .get('/:slug', ({ params, set }) => {
+    // Old post data contains resources that load from the root
+    // which are now in /public. This checks for the resource
+    // and returns it if it exists.
+    const publicFile = Bun.file(`./public/${params.slug}`)
+
+    if (publicFile.size > 0) {
+      return publicFile
+    }
+
+    // This slug is a short link to a post, redirect to it
     set.redirect = `/posts/${params.slug}`
   })
   .listen(3000)
