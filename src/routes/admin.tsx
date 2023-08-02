@@ -135,7 +135,7 @@ export default function (app: Elysia) {
                       hx-target="#preview"
                       hx-trigger="keyup changed delay:500ms"
                     >
-                      {post.body}
+                      {elements.escapeHtml(post.body)}
                     </textarea>
                     <div
                       class="prose dark:prose-invert dark:prose-dark"
