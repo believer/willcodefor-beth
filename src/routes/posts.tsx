@@ -4,9 +4,9 @@ import { and, desc, eq, like, or, sql } from 'drizzle-orm'
 import { Elysia, t } from 'elysia'
 import { Post } from '../components/post'
 import { Posts } from '../components/posts'
-import { db } from '../db'
-import { postViews, posts, Post as PostType } from '../db/schema'
 import { Series } from '../components/series'
+import { db } from '../db'
+import { postViews, posts } from '../db/schema'
 
 export default function (app: Elysia) {
   return app.use(elysiaHtml()).group('/posts', (app) =>
@@ -189,7 +189,13 @@ export default function (app: Elysia) {
 
           return html(
             <li>
-              ← <a href={`/posts/${nextPost.slug}`}>{nextPost.title}</a>
+              ←{' '}
+              <a
+                href={`/posts/${nextPost.slug}`}
+                hx-trigger="click, keyup[ctrlKey && key == 'n'] from:body"
+              >
+                {nextPost.title}
+              </a>
             </li>
           )
         },
@@ -217,7 +223,13 @@ export default function (app: Elysia) {
 
           return html(
             <li class="text-right">
-              <a href={`/posts/${previousPost.slug}`}>{previousPost.title}</a> →
+              <a
+                href={`/posts/${previousPost.slug}`}
+                hx-trigger="click, keyup[ctrlKey && key == 'p'] from:body"
+              >
+                {previousPost.title}
+              </a>{' '}
+              →
             </li>
           )
         },

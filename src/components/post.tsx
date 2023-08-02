@@ -75,13 +75,13 @@ export function Post({
           <div
             class="h-5"
             hx-get={`/posts/next/${tilId}`}
-            hx-trigger="intersect"
+            hx-trigger="load"
             hx-swap="outerHTML"
           />
           <div
             class="h-5"
             hx-get={`/posts/previous/${tilId}`}
-            hx-trigger="intersect"
+            hx-trigger="load"
             hx-swap="outerHTML"
           />
         </ul>
