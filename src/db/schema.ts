@@ -34,14 +34,20 @@ export const postsRelations = relations(posts, ({ many }) => ({
   views: many(postViews),
 }))
 
-export const postViews = sqliteTable('post_views', {
-  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  createdAt: text('createdAt')
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  userAgent: text('userAgent').notNull(),
-  postId: integer('postId'),
-})
+export const postViews = sqliteTable(
+  'post_views',
+  {
+    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    createdAt: text('createdAt')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    userAgent: text('userAgent').notNull(),
+    postId: integer('postId'),
+  },
+  (table) => {
+    return { postIdIdx: index('post_id_idx').on(table.postId) }
+  }
+)
 
 export const postViewsRelations = relations(postViews, ({ one }) => ({
   post: one(posts, {

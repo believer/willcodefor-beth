@@ -162,7 +162,7 @@ export default function (app: Elysia) {
               count: sql`COUNT(*)`,
             })
             .from(postViews)
-            .where(eq(postViews.postId, Number(params.id)))
+            .where(eq(postViews.postId, params.id))
             .get()
 
           return html(<span>{stats.count}</span>)
