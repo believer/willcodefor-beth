@@ -258,11 +258,16 @@ export default function (app: Elysia) {
           '/:slug',
           async ({ body }) => {
             const isPublished = body.published === 'on'
+            const longSlug = body.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '')
 
             await db
               .update(posts)
               .set({
                 ...body,
+                longSlug,
                 published: isPublished,
                 updatedAt: new Date().toISOString(),
               })
