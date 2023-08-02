@@ -1,6 +1,9 @@
 const dateFormatter = (options?: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat('sv-SE', { timeZone: 'CET', ...options })
 
+const numberFormatter = (options?: Intl.NumberFormatOptions) =>
+  new Intl.NumberFormat('sv-SE', options)
+
 export const formatDate = (date: string) =>
   dateFormatter().format(new Date(date))
 
@@ -17,3 +20,6 @@ export const formatDateTime = (
   date: string,
   timeStyle: Intl.DateTimeFormatOptions['timeStyle'] = 'short'
 ) => dateFormatter({ dateStyle: 'short', timeStyle }).format(new Date(date))
+
+export const parsePercent = (input: number) =>
+  numberFormatter({ style: 'percent' }).format(input)

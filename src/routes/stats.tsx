@@ -6,6 +6,9 @@ import { BaseHtml } from '../components/layout'
 import PostList from '../components/postList'
 import { db } from '../db'
 import { postViews, posts } from '../db/schema'
+import userAgentParser from 'ua-parser-js'
+import { parsePercent } from '../utils/intl'
+import { DataList } from '../components/datalist'
 
 export default function (app: Elysia) {
   return app.use(html()).group('/stats', (app) =>
@@ -44,6 +47,11 @@ export default function (app: Elysia) {
             <div hx-trigger="load" hx-get="/stats/chart" class="my-10">
               <div class="h-[400px]" />
             </div>
+            <div
+              class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2"
+              hx-get="/stats/user-agent"
+              hx-trigger="load"
+            />
             <div class="mb-10">
               <h3 class="mb-4 font-semibold uppercase text-gray-500">
                 Most viewed
@@ -224,6 +232,57 @@ GROUP BY 1
           .all()
 
         return html(<PostList posts={data} sort="views" />)
+      })
+      .get('/user-agent', async ({ html }) => {
+        const data = await db
+          .select({
+            userAgent: postViews.userAgent,
+          })
+          .from(postViews)
+          .where(gt(postViews.createdAt, sql`DATE('now', 'start of day')`))
+          .all()
+
+        let os: Record<string, number> = {}
+        let browser: Record<string, number> = {}
+
+        for (const { userAgent } of data) {
+          const parsed = userAgentParser(userAgent)
+
+          if (parsed.os.name) {
+            if (!os[parsed.os.name]) {
+              os[parsed.os.name] = 0
+            }
+
+            os[parsed.os.name]++
+          }
+
+          if (parsed.browser.name) {
+            if (!browser[parsed.browser.name]) {
+              browser[parsed.browser.name] = 0
+            }
+
+            browser[parsed.browser.name]++
+          }
+        }
+
+        const sortedOs = Object.fromEntries(
+          Object.entries(os).sort((a, b) => b[1] - a[1])
+        )
+
+        const sumOs = Object.values(os).reduce((a, b) => a + b, 0)
+
+        const sortedBrowser = Object.fromEntries(
+          Object.entries(browser).sort((a, b) => b[1] - a[1])
+        )
+
+        const sumBrowser = Object.values(browser).reduce((a, b) => a + b, 0)
+
+        return html(
+          <>
+            <DataList data={sortedOs} title="Operating Systems" />
+            <DataList data={sortedBrowser} title="Browsers" />
+          </>
+        )
       })
   )
 }
