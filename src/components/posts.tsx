@@ -53,7 +53,7 @@ export function Posts({ posts, sort = 'createdAt', search = '' }: Props) {
               <li>
                 <a
                   class={clsx({ 'font-bold': sort === 'createdAt' })}
-                  href="?sort=createdAt"
+                  href="/posts?sort=createdAt"
                 >
                   Created
                 </a>
@@ -61,7 +61,7 @@ export function Posts({ posts, sort = 'createdAt', search = '' }: Props) {
               <li>
                 <a
                   class={clsx({ 'font-bold': sort === 'updatedAt' })}
-                  href="?sort=updatedAt"
+                  href="/posts?sort=updatedAt"
                 >
                   Last updated
                 </a>
@@ -69,7 +69,7 @@ export function Posts({ posts, sort = 'createdAt', search = '' }: Props) {
               <li>
                 <a
                   class={clsx({ 'font-bold': sort === 'views' })}
-                  href="?sort=views"
+                  href="/posts?sort=views"
                 >
                   Views
                 </a>
