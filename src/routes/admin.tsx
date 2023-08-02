@@ -57,6 +57,7 @@ export default function (app: Elysia) {
                     ) : null}
                     <button
                       class="text-red-400"
+                      hx-confirm="Are you sure you want to delete this post?"
                       hx-delete={`/admin/${post.slug}`}
                     >
                       Delete
@@ -192,7 +193,16 @@ export default function (app: Elysia) {
                       checked={post.published}
                     />
                   </section>
-                  <footer class="flex justify-end mt-4">
+                  <footer class="flex justify-end mt-4 gap-2">
+                    {!isNewPost ? (
+                      <button
+                        class="px-4 py-2 bg-red-400"
+                        hx-confirm="Are you sure you want to delete this post?"
+                        hx-delete={`/admin/${post.slug}`}
+                      >
+                        Delete
+                      </button>
+                    ) : null}
                     <button class="px-4 py-2 bg-brandBlue-500">Save</button>
                   </footer>
                 </form>
