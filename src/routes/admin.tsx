@@ -67,139 +67,147 @@ export default function (app: Elysia) {
             </BaseHtml>
           )
         })
-        .get('/:slug', async ({ html, params }) => {
-          let post = {
-            excerpt: '',
-            tilId: null,
-            longSlug: '',
-            title: '',
-            slug: params.slug,
-            body: '',
-            series: null,
-            published: false,
-          } as Post
+        .get(
+          '/:slug',
+          async ({ html, params }) => {
+            let post = {
+              excerpt: '',
+              tilId: null,
+              longSlug: '',
+              title: '',
+              slug: params.slug,
+              body: '',
+              series: null,
+              published: false,
+            } as Post
 
-          const isNewPost = params.slug === 'new'
+            const isNewPost = params.slug === 'new'
 
-          if (!isNewPost) {
-            post = await db
-              .select()
-              .from(posts)
-              .where(eq(posts.slug, params.slug))
-              .get()
-          }
+            if (!isNewPost) {
+              post = await db
+                .select()
+                .from(posts)
+                .where(eq(posts.slug, params.slug))
+                .get()
+            }
 
-          const isDraft = !isNewPost && !post.published
+            const isDraft = !isNewPost && !post.published
 
-          return html(
-            <BaseHtml noHeader path="/admin">
-              <div class="flex items-center justify-between">
-                <a href="/admin">← Back</a>
-                {!isNewPost ? (
-                  <span class="text-gray-500 dark:text-gray-600">
-                    Last updated:{' '}
-                    <span id="update-time">
-                      {formatDateTime(post.updatedAt, 'medium')}
+            return html(
+              <BaseHtml noHeader path="/admin">
+                <div class="flex items-center justify-between">
+                  <a href="/admin">← Back</a>
+                  {!isNewPost ? (
+                    <span class="text-gray-500 dark:text-gray-600">
+                      Last updated:{' '}
+                      <span id="update-time">
+                        {formatDateTime(post.updatedAt, 'medium')}
+                      </span>
                     </span>
-                  </span>
-                ) : null}
-              </div>
-              <form
-                action={isNewPost ? `/admin/${post.slug}` : undefined}
-                method={isNewPost ? 'POST' : undefined}
-                hx-patch={!isNewPost ? `/admin/${post.slug}` : undefined}
-                hx-trigger={
-                  isDraft
-                    ? 'submit, every 1m'
-                    : !isNewPost
-                    ? 'submit'
-                    : undefined
-                }
-                hx-target={!isNewPost ? '#update-time' : undefined}
-              >
-                <input
-                  class="my-8 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                  type="text"
-                  name="title"
-                  value={post.title}
-                  required="true"
-                />
-                <div class="grid grid-cols-2 gap-10">
-                  <textarea
-                    class="rounded-sm border bg-transparent p-4 ring-blue-700 ring-offset-4 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                    name="body"
-                    required="true"
-                    hx-get="/admin/preview"
-                    hx-target="#preview"
-                    hx-trigger="keyup changed delay:500ms"
-                  >
-                    {post.body}
-                  </textarea>
-                  <div
-                    class="prose dark:prose-invert dark:prose-dark"
-                    id="preview"
-                  >
-                    {md.render(post.body)}
-                  </div>
+                  ) : null}
                 </div>
-                <section class="mt-8 space-y-2">
-                  <header class="font-semibold text-lg">Metadata</header>
+                <form
+                  action={isNewPost ? `/admin/${post.slug}` : undefined}
+                  method={isNewPost ? 'POST' : undefined}
+                  hx-patch={!isNewPost ? `/admin/${post.slug}` : undefined}
+                  hx-trigger={
+                    isDraft
+                      ? 'submit, every 1m'
+                      : !isNewPost
+                      ? 'submit'
+                      : undefined
+                  }
+                  hx-target={!isNewPost ? '#update-time' : undefined}
+                >
                   <input
-                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    class="my-8 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                     type="text"
-                    name="slug"
-                    placeholder="Slug"
+                    name="title"
+                    value={post.title}
                     required="true"
-                    value={post.slug === 'new' ? '' : post.slug}
                   />
-                  <input
-                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                    name="longSlug"
-                    readonly="true"
-                    placeholder="Long Slug"
-                    type="text"
-                    value={post.longSlug}
-                  />
-                  <input
-                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                    name="excerpt"
-                    placeholder="Excerpt"
-                    type="text"
-                    required="true"
-                    value={post.excerpt}
-                  />
-                  <input
-                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                    name="tilId"
-                    readonly="true"
-                    placeholder="TIL ID"
-                    type="number"
-                    value={post.tilId?.toString()}
-                  />
+                  <div class="grid grid-cols-2 gap-10">
+                    <textarea
+                      class="rounded-sm border bg-transparent p-4 ring-blue-700 ring-offset-4 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                      name="body"
+                      required="true"
+                      hx-get="/admin/preview"
+                      hx-target="#preview"
+                      hx-trigger="keyup changed delay:500ms"
+                    >
+                      {post.body}
+                    </textarea>
+                    <div
+                      class="prose dark:prose-invert dark:prose-dark"
+                      id="preview"
+                    >
+                      {md.render(post.body)}
+                    </div>
+                  </div>
+                  <section class="mt-8 space-y-2">
+                    <header class="font-semibold text-lg">Metadata</header>
+                    <input
+                      class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                      type="text"
+                      name="slug"
+                      placeholder="Slug"
+                      required="true"
+                      value={post.slug === 'new' ? '' : post.slug}
+                    />
+                    <input
+                      class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                      name="longSlug"
+                      readonly="true"
+                      placeholder="Long Slug"
+                      type="text"
+                      value={post.longSlug}
+                    />
+                    <input
+                      class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                      name="excerpt"
+                      placeholder="Excerpt"
+                      type="text"
+                      required="true"
+                      value={post.excerpt}
+                    />
+                    <input
+                      class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                      name="tilId"
+                      readonly="true"
+                      placeholder="TIL ID"
+                      type="number"
+                      value={post.tilId?.toString()}
+                    />
 
-                  <input
-                    class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                    type="text"
-                    name="series"
-                    placeholder="Series"
-                    value={post.series ?? ''}
-                  />
-                  <input
-                    type="checkbox"
-                    name="published"
-                    checked={post.published}
-                  />
-                </section>
-                <footer class="flex justify-end mt-4">
-                  <button class="px-4 py-2 bg-brandBlue-500">Save</button>
-                </footer>
-              </form>
-            </BaseHtml>
-          )
-        })
+                    <input
+                      class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                      type="text"
+                      name="series"
+                      placeholder="Series"
+                      value={post.series ?? ''}
+                    />
+                    <input
+                      type="checkbox"
+                      name="published"
+                      checked={post.published}
+                    />
+                  </section>
+                  <footer class="flex justify-end mt-4">
+                    <button class="px-4 py-2 bg-brandBlue-500">Save</button>
+                  </footer>
+                </form>
+              </BaseHtml>
+            )
+          },
+          {
+            params: t.Object({
+              slug: t.String(),
+            }),
+          }
+        )
         .post(
           '/:slug',
-          async ({ set, body, params }) => {
+          async ({ set, body }) => {
             const isPublished = body.published === 'on'
             const longSlug = body.title
               .toLowerCase()
@@ -240,7 +248,7 @@ export default function (app: Elysia) {
               title: t.String(),
               body: t.String(),
               published: t.Optional(t.Literal('on')),
-              tilId: t.Optional(t.String()),
+              tilId: t.Optional(t.Numeric()),
               excerpt: t.String(),
               longSlug: t.Optional(t.String()),
             }),
@@ -267,13 +275,16 @@ export default function (app: Elysia) {
             }).format(new Date())
           },
           {
+            params: t.Object({
+              slug: t.String(),
+            }),
             body: t.Object({
               series: t.String(),
               slug: t.String(),
               title: t.String(),
               body: t.String(),
               published: t.Optional(t.Literal('on')),
-              tilId: t.Optional(t.String()),
+              tilId: t.Optional(t.Numeric()),
               excerpt: t.String(),
               longSlug: t.Optional(t.String()),
             }),
@@ -296,16 +307,10 @@ export default function (app: Elysia) {
             }),
           }
         )
-        .get(
-          '/preview',
-          async ({ query }) => {
-            return md.render(query.body)
-          },
-          {
-            query: t.Object({
-              body: t.String(),
-            }),
-          }
-        )
+        .get('/preview', async ({ query }) => md.render(query.body), {
+          query: t.Object({
+            body: t.String(),
+          }),
+        })
   )
 }
