@@ -92,7 +92,7 @@ export default function (app: Elysia) {
           const isDraft = !isNewPost && !post.published
 
           return html(
-            <BaseHtml noHeader highlight path="/admin">
+            <BaseHtml noHeader path="/admin">
               <div class="flex items-center justify-between">
                 <a href="/admin">← Back</a>
                 {!isNewPost ? (

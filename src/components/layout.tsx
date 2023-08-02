@@ -3,13 +3,11 @@ import elements from '@kitajs/html'
 
 export const BaseHtml = ({
   children,
-  highlight = false,
   noHeader = false,
   path,
   title,
   meta = null,
 }: elements.PropsWithChildren<{
-  highlight?: boolean
   noHeader?: boolean
   path?: string
   title?: string
@@ -41,11 +39,13 @@ export const BaseHtml = ({
 
           <link href="/public/styles.css" rel="stylesheet" />
           <link rel="icon" href="/public/favicon.ico" type="image/x-icon" />
-          {highlight
-            ? '<link href="/public/tokyonight.css" rel="stylesheet" />'
-            : ''}
+          <link href="/public/tokyonight.css" rel="stylesheet" />
+          <script src="/public/htmx.min.js"></script>
         </head>
-        <body class="bg-white dark:bg-tokyoNight-bg dark:text-gray-200">
+        <body
+          class="bg-white dark:bg-tokyoNight-bg dark:text-gray-200"
+          hx-boost="true"
+        >
           <main
             class={clsx('grid py-5', {
               'grid-template-main': path !== '/admin',
@@ -81,7 +81,6 @@ export const BaseHtml = ({
               {children}
             </div>
           </main>
-          <script src="/public/htmx.min.js"></script>
         </body>
       </html>
     )

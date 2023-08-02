@@ -77,7 +77,9 @@ export function Home({ latestPosts }: Props) {
           </ol>
 
           <div class="mt-4 flex justify-end">
-            <a href="feed.xml">Feed</a>
+            <a href="feed.xml" hx-boost="false">
+              Feed
+            </a>
           </div>
         </div>
       </section>

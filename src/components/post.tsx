@@ -31,7 +31,6 @@ export function Post({
   return (
     <BaseHtml
       title={title}
-      highlight
       path="/posts"
       meta={
         <>
