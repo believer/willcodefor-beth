@@ -43,12 +43,12 @@ export default function (app: Elysia) {
             <>
               <div
                 id="command-menu"
-                class="bg-gray-900/70 fixed inset-0 flex justify-center items-center"
+                class="bg-tokyoNight-bg/30 fixed inset-0 flex justify-center items-center"
                 hx-get="/command-menu/close"
                 hx-trigger="keyup[ctrlKey && key == 'k'] from:body, keyup[key == 'Escape'] from:body"
                 hx-swap="outerHTML"
               >
-                <div class="w-[80dvw] md:w-[60dvw] lg:w-[40dvw] rounded shadow-lg bg-tokyoNight-bg p-6 border-gray-800">
+                <div class="w-[80dvw] md:w-[60dvw] lg:w-[40dvw] rounded shadow-lg bg-tokyoNight-dark p-6 border-gray-800">
                   <input
                     autofocus="true"
                     type="text"
