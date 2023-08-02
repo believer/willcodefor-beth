@@ -5,6 +5,7 @@ import { BaseHtml } from './layout'
 import Projects from './projects'
 import { GitHub, Twitter } from './socialMedia'
 import Work from './work'
+import { ExternalLink } from './link'
 
 type Props = {
   latestPosts: Pick<Post, 'slug' | 'title' | 'tilId' | 'createdAt'>[]
@@ -22,8 +23,8 @@ export function Home({ latestPosts }: Props) {
             Hej! I'm a developer from Sweden. I enjoy making user-friendly
             websites and creating tools that make life easier for other
             developers. I currently love working in{' '}
-            <a href="https://htmx.org/">htmx</a> and{' '}
-            <a href="https://www.rust-lang.org/">Rust</a>.
+            <ExternalLink href="https://htmx.org/">htmx</ExternalLink> and{' '}
+            <ExternalLink href="https://www.rust-lang.org/">Rust</ExternalLink>.
           </header>
           <section class="mt-10 flex items-center space-x-6">
             <GitHub />
@@ -48,9 +49,12 @@ export function Home({ latestPosts }: Props) {
 
           <p>
             This is heavily inspired by Lee Byron's{' '}
-            <a href="https://leebyron.com/til">TIL</a> and builds on top of my
-            initial attempt with my{' '}
-            <a href="https://devlog.willcodefor.beer">Devlog</a>.
+            <ExternalLink href="https://leebyron.com/til">TIL</ExternalLink> and
+            builds on top of my initial attempt with my{' '}
+            <ExternalLink href="https://devlog.willcodefor.beer">
+              Devlog
+            </ExternalLink>
+            .
           </p>
 
           <ol class="mt-8 space-y-2 sm:space-y-4">

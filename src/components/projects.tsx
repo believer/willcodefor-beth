@@ -1,4 +1,5 @@
 import elements from '@kitajs/html'
+import { ExternalLink } from './link'
 
 const projects = [
   {
@@ -81,13 +82,12 @@ const Projects = () => {
                 </div>
               </div>
               <div class="mt-4 flex flex-wrap"></div>
-              <a
-                class="underline"
+              <ExternalLink
                 href={p.link}
                 aria-label={`Source code for ${p.name} on GitHub`}
               >
                 Link
-              </a>
+              </ExternalLink>
             </div>
           </details>
         ))}

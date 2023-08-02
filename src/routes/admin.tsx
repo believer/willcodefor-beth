@@ -1,12 +1,12 @@
 import { html } from '@elysiajs/html'
-import Elysia, { t } from 'elysia'
 import elements from '@kitajs/html'
+import { desc, eq } from 'drizzle-orm'
+import Elysia, { t } from 'elysia'
+import { BaseHtml } from '../components/layout'
 import { db } from '../db'
 import { Post, posts } from '../db/schema'
-import { desc, eq, is } from 'drizzle-orm'
-import { BaseHtml } from '../components/layout'
-import { md } from '../utils/markdown'
 import { formatDateTime } from '../utils/intl'
+import { md } from '../utils/markdown'
 
 export default function (app: Elysia) {
   return app.group(
