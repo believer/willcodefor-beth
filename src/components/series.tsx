@@ -4,6 +4,7 @@ import { Post } from '../db/schema'
 const seriesNames = {
   applescript: 'AppleScript',
   dataview: 'Dataview',
+  htmx: 'htmx',
   intl: 'Intl',
   neovim: 'Neovim',
   rescript: 'ReScript',
