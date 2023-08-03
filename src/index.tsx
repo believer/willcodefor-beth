@@ -8,7 +8,6 @@ import postRoutes from './routes/posts'
 import xmlRoutes from './routes/xml'
 import staticRoutes from './routes/static'
 import adminRoutes from './routes/admin'
-import statsRoutes from './routes/stats'
 
 const app = new Elysia()
   .use(html())
@@ -21,8 +20,6 @@ const app = new Elysia()
   .use(xmlRoutes)
   // Admin
   .use(adminRoutes)
-  // Stats
-  .use(statsRoutes)
   // Iteam work
   .get('/iteam', ({ html }) => html(<Iteam />))
   // Static files

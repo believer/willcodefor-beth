@@ -17,7 +17,7 @@ export default function (app: Elysia) {
           <BaseHtml noHeader>
             <div class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
               <div class="flex flex-col items-center justify-center text-center text-8xl font-bold">
-                <span hx-trigger="load" hx-get="/stats/total-views">
+                <span hx-trigger="load" hx-get="/admin/stats/total-views">
                   0
                 </span>
                 <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
@@ -27,7 +27,7 @@ export default function (app: Elysia) {
             </div>
             <div
               class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2"
-              hx-get="/stats/user-agent"
+              hx-get="/admin/stats/user-agent"
               hx-trigger="load"
             />
             <div class="mb-10">
@@ -36,7 +36,7 @@ export default function (app: Elysia) {
               </h3>
               <div
                 hx-trigger="load"
-                hx-get="/stats/most-viewed"
+                hx-get="/admin/stats/most-viewed"
                 id="most-viewed"
                 hx-swap="outerHTML"
               />
@@ -47,7 +47,7 @@ export default function (app: Elysia) {
               </h3>
               <div
                 hx-trigger="load"
-                hx-get="/stats/most-viewed-today"
+                hx-get="/admin/stats/most-viewed-today"
                 hx-swap="outerHTML"
               />
             </div>

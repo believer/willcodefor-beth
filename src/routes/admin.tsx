@@ -7,6 +7,7 @@ import { db } from '../db'
 import { Post, posts } from '../db/schema'
 import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'
+import statsRoutes from './stats'
 
 export default function (app: Elysia) {
   return app.group(
@@ -33,6 +34,7 @@ export default function (app: Elysia) {
     (app) =>
       app
         .use(html())
+        .use(statsRoutes)
         .get('', async ({ html }) => {
           const allPosts = await db
             .select({
