@@ -75,15 +75,19 @@ export function Post({
           <div
             class="h-5"
             hx-get={`/posts/next/${tilId}`}
-            hx-trigger="load"
+            hx-trigger="revealed"
             hx-swap="outerHTML"
-          />
+          >
+            <div class="htmx-indicator">Loading next post...</div>
+          </div>
           <div
             class="h-5"
             hx-get={`/posts/previous/${tilId}`}
-            hx-trigger="load"
+            hx-trigger="revealed"
             hx-swap="outerHTML"
-          />
+          >
+            <div class="htmx-indicator">Loading previous post...</div>
+          </div>
         </ul>
         <footer class="mt-8 text-center text-xs text-gray-600">
           This til was created{' '}
