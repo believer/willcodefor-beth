@@ -55,22 +55,20 @@ export default function (app: Elysia) {
         )
       })
       .get('/total-views', async ({ html }) => {
-        const { totalViews } = await db
+        const [{ totalViews }] = await db
           .select({
             totalViews: sql<number>`COUNT(id)`,
           })
           .from(postViews)
-          .get()
 
         return html(<div>{totalViews}</div>)
       })
       .get('/views-per-day', async ({ html }) => {
-        const { viewsPerDay } = await db
+        const [{ viewsPerDay }] = await db
           .select({
             viewsPerDay: sql<number>`ROUND((COUNT(id) / (JULIANDAY(max("createdAt")) - JULIANDAY(min("createdAt")) + 1)), 2)`,
           })
           .from(postViews)
-          .get()
 
         return html(<div>{viewsPerDay}</div>)
       })
@@ -93,7 +91,6 @@ export default function (app: Elysia) {
             .orderBy(sql`count DESC`)
             .offset(10 * (page - 1))
             .limit(10)
-            .all()
 
           const postsWithViews = await db
             .select({
@@ -101,7 +98,6 @@ export default function (app: Elysia) {
             })
             .from(postViews)
             .groupBy(postViews.postId)
-            .all()
 
           const hasMore = postsWithViews.length > 10 * page
 
@@ -137,7 +133,6 @@ export default function (app: Elysia) {
           .where(gt(postViews.createdAt, sql`DATE('now', 'start of day')`))
           .groupBy(posts.id)
           .orderBy(sql`count DESC`)
-          .all()
 
         return html(<PostList posts={data} sort="views" />)
       })
@@ -148,7 +143,6 @@ export default function (app: Elysia) {
           })
           .from(postViews)
           .where(gt(postViews.createdAt, sql`DATE('now', 'start of day')`))
-          .all()
 
         let os: Record<string, number> = {}
         let browser: Record<string, number> = {}

@@ -39,7 +39,6 @@ export default function (app: Elysia) {
                 )
               )
               .orderBy(desc(posts.id))
-              .all()
 
             return html(<Posts posts={data} search={query.search} />)
           }
@@ -49,14 +48,13 @@ export default function (app: Elysia) {
             const data = await db
               .select({
                 ...commonValues,
-                views: sql<number>`COUNT("post_views".id) as views`,
+                views: sql<number>`COUNT(${postViews.id}) as views`,
               })
               .from(posts)
               .innerJoin(postViews, eq(postViews.postId, posts.id))
               .groupBy(posts.id)
               .orderBy(desc(sql`views`))
               .where(eq(posts.published, true))
-              .all()
 
             return html(<Posts posts={data} sort="views" />)
           }
@@ -73,7 +71,6 @@ export default function (app: Elysia) {
             .from(posts)
             .orderBy(sortOrder)
             .where(eq(posts.published, true))
-            .all()
 
           return html(<Posts posts={data} sort={query.sort} />)
         },
@@ -93,7 +90,7 @@ export default function (app: Elysia) {
       .get(
         '/:slug',
         async ({ html, params }) => {
-          const post = await db
+          const [post] = await db
             .select({
               body: posts.body,
               createdAt: posts.createdAt,
@@ -108,7 +105,6 @@ export default function (app: Elysia) {
             .where(
               or(eq(posts.slug, params.slug), eq(posts.longSlug, params.slug))
             )
-            .get()
 
           if (!post) {
             return html(
@@ -138,7 +134,6 @@ export default function (app: Elysia) {
               and(eq(posts.series, params.series), eq(posts.published, true))
             )
             .orderBy(desc(posts.id))
-            .all()
 
           return html(
             <Series posts={series} series={params.series} title={query.title} />
@@ -159,32 +154,28 @@ export default function (app: Elysia) {
 
           // Update views
           if (isProduction && headers['user-agent'] && !isGoogleBot) {
-            await db
-              .insert(postViews)
-              .values({
-                postId: Number(params.id),
-                userAgent: headers['user-agent'],
-              })
-              .run()
+            await db.insert(postViews).values({
+              postId: params.id,
+              userAgent: headers['user-agent'],
+            })
           }
 
           // Get views
-          const stats = await db
+          const [stats] = await db
             .select({
-              count: sql`COUNT(*)`,
+              count: sql<number>`COUNT(*)`,
             })
             .from(postViews)
             .where(eq(postViews.postId, params.id))
-            .get()
 
           return html(<span>{stats.count}</span>)
         },
-        { params: t.Object({ id: t.Numeric() }) }
+        { params: t.Object({ id: t.String() }) }
       )
       .get(
         '/next/:tilId',
         async ({ html, params }) => {
-          const nextPost = await db
+          const [nextPost] = await db
             .select({
               slug: posts.slug,
               title: posts.title,
@@ -193,7 +184,6 @@ export default function (app: Elysia) {
             .where(
               and(eq(posts.tilId, params.tilId + 1), eq(posts.published, true))
             )
-            .get()
 
           if (!nextPost) {
             return <div />
@@ -218,7 +208,7 @@ export default function (app: Elysia) {
       .get(
         '/previous/:tilId',
         async ({ html, params }) => {
-          const previousPost = await db
+          const [previousPost] = await db
             .select({
               slug: posts.slug,
               title: posts.title,
@@ -227,7 +217,6 @@ export default function (app: Elysia) {
             .where(
               and(eq(posts.tilId, params.tilId - 1), eq(posts.published, true))
             )
-            .get()
 
           if (!previousPost) {
             return <div />

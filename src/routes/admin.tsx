@@ -44,7 +44,6 @@ export default function (app: Elysia) {
             })
             .from(posts)
             .orderBy(desc(posts.id))
-            .all()
 
           return html(
             <BaseHtml noHeader>
@@ -74,24 +73,23 @@ export default function (app: Elysia) {
           '/:slug',
           async ({ html, params }) => {
             let post = {
-              excerpt: '',
-              tilId: null,
-              longSlug: '',
-              title: '',
-              slug: params.slug,
               body: '',
-              series: null,
+              excerpt: '',
+              longSlug: '',
               published: false,
+              series: null,
+              slug: params.slug,
+              tilId: 0,
+              title: '',
             } as Post
 
             const isNewPost = params.slug === 'new'
 
             if (!isNewPost) {
-              post = await db
+              ;[post] = await db
                 .select()
                 .from(posts)
                 .where(eq(posts.slug, params.slug))
-                .get()
             }
 
             const isDraft = !isNewPost && !post.published
@@ -226,27 +224,23 @@ export default function (app: Elysia) {
               .replace(/[^a-z0-9]+/g, '-')
               .replace(/(^-|-$)/g, '')
 
-            const latestPost = await db
+            const [latestPost] = await db
               .select({
                 tilId: posts.tilId,
               })
               .from(posts)
               .orderBy(desc(posts.id))
               .limit(1)
-              .get()
 
-            await db
-              .insert(posts)
-              .values({
-                ...body,
-                series: body.series !== '' ? body.series : null,
-                longSlug,
-                tilId: (latestPost.tilId ?? 0) + 1,
-                published: isPublished,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              })
-              .run()
+            await db.insert(posts).values({
+              ...body,
+              series: body.series !== '' ? body.series : null,
+              longSlug,
+              tilId: (Number(latestPost.tilId) ?? 0) + 1,
+              published: isPublished,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            })
 
             set.redirect = `/admin/${body.slug}`
           },
@@ -284,7 +278,6 @@ export default function (app: Elysia) {
                 updatedAt: new Date().toISOString(),
               })
               .where(eq(posts.slug, body.slug))
-              .run()
 
             return new Intl.DateTimeFormat('sv-SE', {
               dateStyle: 'short',
@@ -310,7 +303,7 @@ export default function (app: Elysia) {
         .delete(
           '/:slug',
           async ({ params }) => {
-            await db.delete(posts).where(eq(posts.slug, params.slug)).run()
+            await db.delete(posts).where(eq(posts.slug, params.slug))
 
             return new Response(null, {
               headers: {

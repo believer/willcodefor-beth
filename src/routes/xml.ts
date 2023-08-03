@@ -85,7 +85,6 @@ export default function (app: Elysia) {
         .from(posts)
         .orderBy(desc(posts.id))
         .where(eq(posts.published, true))
-        .all()
 
       const feed = generateFeed(data)
 
@@ -100,7 +99,6 @@ export default function (app: Elysia) {
         .from(posts)
         .orderBy(desc(posts.id))
         .where(eq(posts.published, true))
-        .all()
 
       const sitemap = generateSitemap(data)
 

@@ -21,7 +21,6 @@ export default function (app: Elysia) {
         .orderBy(desc(posts.id))
         .where(eq(posts.published, true))
         .limit(5)
-        .all()
 
       return html(<Home latestPosts={latestPosts} />)
     })
@@ -37,7 +36,6 @@ export default function (app: Elysia) {
             .orderBy(desc(posts.id))
             .where(eq(posts.published, true))
             .limit(5)
-            .all()
 
           return html(
             <>
@@ -100,7 +98,6 @@ export default function (app: Elysia) {
               )
             )
             .limit(5)
-            .all()
 
           return html(
             <>

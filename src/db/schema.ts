@@ -1,61 +1,109 @@
-import { InferModel, relations, sql } from 'drizzle-orm'
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { InferModel } from 'drizzle-orm'
+import {
+  boolean,
+  index,
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core'
 
-export const posts = sqliteTable(
-  'posts',
+export const postViews = pgTable(
+  'PostView',
   {
-    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    title: text('title').notNull(),
-    body: text('body').notNull(),
-    excerpt: text('excerpt').notNull(),
-    slug: text('slug').notNull().unique(),
-    longSlug: text('longSlug').notNull().unique(),
-    series: text('series').default(sql`NULL`),
-    published: integer('published', { mode: 'boolean' })
+    id: serial('id').primaryKey().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    postId: text('postId')
       .notNull()
-      .default(false),
-    tilId: integer('tilId', { mode: 'number' }),
-    createdAt: text('createdAt')
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: text('updatedAt')
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
+      .references(() => posts.id, {
+        onDelete: 'restrict',
+        onUpdate: 'cascade',
+      }),
+    userAgent: text('userAgent').notNull(),
   },
   (table) => {
     return {
-      tilIdIdx: index('til_id_idx').on(table.tilId),
-      sludIdx: index('slug_idx').on(table.slug),
-      seriesIdx: index('series_idx').on(table.series),
+      postIdIdx: index('PostView_postId_idx').on(table.postId),
     }
   }
 )
 
-export const postsRelations = relations(posts, ({ many }) => ({
-  views: many(postViews),
-}))
-
-export const postViews = sqliteTable(
-  'post_views',
+export const posts = pgTable(
+  'Post',
   {
-    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    createdAt: text('createdAt')
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
-    userAgent: text('userAgent').notNull(),
-    postId: integer('postId'),
+    id: serial('id').primaryKey().notNull(),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    excerpt: text('excerpt').notNull(),
+    slug: text('slug').notNull(),
+    series: text('series'),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updatedAt', {
+      precision: 3,
+      mode: 'string',
+    }).notNull(),
+    tilId: integer('tilId').notNull(),
+    language: text('language').default('en').notNull(),
+    longSlug: text('longSlug').notNull(),
+    published: boolean('published').default(false).notNull(),
   },
   (table) => {
-    return { postIdIdx: index('post_id_idx').on(table.postId) }
+    return {
+      slugUnique: unique('slug_unique').on(table.slug),
+      longslugUnique: unique('longslug_unique').on(table.longSlug),
+    }
   }
 )
 
-export const postViewsRelations = relations(postViews, ({ one }) => ({
-  post: one(posts, {
-    fields: [postViews.postId],
-    references: [posts.id],
-  }),
-}))
+export const tag = pgTable(
+  'Tag',
+  {
+    id: serial('id').primaryKey().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updatedAt', {
+      precision: 3,
+      mode: 'string',
+    }).notNull(),
+    name: text('name').notNull(),
+  },
+  (table) => {
+    return {
+      nameKey: uniqueIndex('Tag_name_key').on(table.name),
+    }
+  }
+)
+
+export const postTag = pgTable(
+  'Post_Tag',
+  {
+    id: serial('id').primaryKey().notNull(),
+    postId: text('post_id')
+      .notNull()
+      .references(() => posts.id, {
+        onDelete: 'restrict',
+        onUpdate: 'restrict',
+      }),
+    tagId: integer('tag_id')
+      .notNull()
+      .references(() => tag.id, { onDelete: 'restrict', onUpdate: 'restrict' }),
+  },
+  (table) => {
+    return {
+      postIdIdx: index('Post_Tag_post_id_idx').on(table.postId),
+      tagIdIdx: index('Post_Tag_tag_id_idx').on(table.tagId),
+    }
+  }
+)
 
 export type Post = InferModel<typeof posts>
-export type PostView = InferModel<typeof postViews>
+export type PostViews = InferModel<typeof postViews>
+export type Tag = InferModel<typeof postTag>
