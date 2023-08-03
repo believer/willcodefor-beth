@@ -83,7 +83,7 @@ export default function (app: Elysia) {
           updatedAt: posts.updatedAt,
         })
         .from(posts)
-        .orderBy(desc(posts.createdAt))
+        .orderBy(desc(posts.id))
         .where(eq(posts.published, true))
         .all()
 
@@ -98,7 +98,7 @@ export default function (app: Elysia) {
           updatedAt: posts.updatedAt,
         })
         .from(posts)
-        .orderBy(desc(posts.createdAt))
+        .orderBy(desc(posts.id))
         .where(eq(posts.published, true))
         .all()
 

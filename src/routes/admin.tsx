@@ -41,7 +41,7 @@ export default function (app: Elysia) {
               slug: posts.slug,
             })
             .from(posts)
-            .orderBy(desc(posts.createdAt))
+            .orderBy(desc(posts.id))
             .all()
 
           return html(
@@ -229,7 +229,7 @@ export default function (app: Elysia) {
                 tilId: posts.tilId,
               })
               .from(posts)
-              .orderBy(desc(posts.createdAt))
+              .orderBy(desc(posts.id))
               .limit(1)
               .get()
 

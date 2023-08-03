@@ -18,7 +18,7 @@ export default function (app: Elysia) {
           title: posts.title,
         })
         .from(posts)
-        .orderBy(desc(posts.createdAt))
+        .orderBy(desc(posts.id))
         .where(eq(posts.published, true))
         .limit(5)
         .all()
@@ -34,7 +34,7 @@ export default function (app: Elysia) {
               title: posts.title,
             })
             .from(posts)
-            .orderBy(desc(posts.createdAt))
+            .orderBy(desc(posts.id))
             .where(eq(posts.published, true))
             .limit(5)
             .all()
@@ -92,7 +92,7 @@ export default function (app: Elysia) {
               title: posts.title,
             })
             .from(posts)
-            .orderBy(desc(posts.createdAt))
+            .orderBy(desc(posts.id))
             .where(
               and(
                 eq(posts.published, true),
@@ -103,20 +103,22 @@ export default function (app: Elysia) {
             .all()
 
           return html(
-            data.map((post, i) => (
-              <li class="flex justify-between items-center focus-within:bg-gray-800 p-2 -mx-2 rounded-sm">
-                <a
-                  class="focus:outline-none"
-                  href={`/posts/${post.slug}`}
-                  hx-trigger={`click, keyup[ctrlKey && key == ${
-                    i + 1
-                  }] from:body`}
-                >
-                  {post.title}
-                </a>
-                <div class="text-xs text-gray-700">(ctrl + {i + 1})</div>
-              </li>
-            ))
+            <>
+              {data.map((post, i) => (
+                <li class="flex justify-between items-center focus-within:bg-gray-800 p-2 -mx-2 rounded-sm">
+                  <a
+                    class="focus:outline-none"
+                    href={`/posts/${post.slug}`}
+                    hx-trigger={`click, keyup[ctrlKey && key == ${
+                      i + 1
+                    }] from:body`}
+                  >
+                    {post.title}
+                  </a>
+                  <div class="text-xs text-gray-700">(ctrl + {i + 1})</div>
+                </li>
+              ))}
+            </>
           )
         })
         .get('/close', async ({ html }) => {

@@ -37,7 +37,7 @@ export default function (app: Elysia) {
                   eq(posts.published, true)
                 )
               )
-              .orderBy(desc(posts.createdAt))
+              .orderBy(desc(posts.id))
               .all()
 
             return html(<Posts posts={data} search={query.search} />)
@@ -61,7 +61,7 @@ export default function (app: Elysia) {
           }
 
           // Handle date sorting
-          let sortOrder = desc(posts.createdAt)
+          let sortOrder = desc(posts.id)
 
           if (query.sort === 'updatedAt') {
             sortOrder = desc(posts.updatedAt)
@@ -125,7 +125,7 @@ export default function (app: Elysia) {
             .where(
               and(eq(posts.series, params.series), eq(posts.published, true))
             )
-            .orderBy(desc(posts.createdAt))
+            .orderBy(desc(posts.id))
             .all()
 
           return html(
