@@ -10,7 +10,6 @@ type Props = Pick<
   | 'body'
   | 'excerpt'
   | 'title'
-  | 'tilId'
   | 'updatedAt'
   | 'createdAt'
   | 'series'
@@ -22,7 +21,6 @@ export function Post({
   createdAt,
   excerpt,
   id,
-  tilId,
   title,
   updatedAt,
   series,
@@ -74,7 +72,7 @@ export function Post({
         <ul class="flex flex-col items-center justify-between gap-5 space-y-3 text-sm sm:flex-row sm:space-y-0">
           <div
             class="h-5"
-            hx-get={`/posts/next/${tilId}`}
+            hx-get={`/posts/next/${id}`}
             hx-trigger="revealed"
             hx-swap="outerHTML"
           >
@@ -82,7 +80,7 @@ export function Post({
           </div>
           <div
             class="h-5"
-            hx-get={`/posts/previous/${tilId}`}
+            hx-get={`/posts/previous/${id}`}
             hx-trigger="revealed"
             hx-swap="outerHTML"
           >

@@ -7,7 +7,6 @@ import { db } from '../db'
 import { Post, posts } from '../db/schema'
 import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'
-import statsRoutes from './stats'
 
 export default function (app: Elysia) {
   return app.group(
@@ -34,7 +33,6 @@ export default function (app: Elysia) {
     (app) =>
       app
         .use(html())
-        .use(statsRoutes)
         .get('', async ({ html }) => {
           const allPosts = await db
             .select({
@@ -79,7 +77,6 @@ export default function (app: Elysia) {
               published: false,
               series: null,
               slug: params.slug,
-              tilId: 0,
               title: '',
             } as Post
 
@@ -173,15 +170,6 @@ export default function (app: Elysia) {
                     />
                     <input
                       class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
-                      name="tilId"
-                      readonly="true"
-                      placeholder="TIL ID"
-                      type="number"
-                      value={post.tilId?.toString()}
-                    />
-
-                    <input
-                      class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                       type="text"
                       name="series"
                       placeholder="Series"
@@ -224,22 +212,11 @@ export default function (app: Elysia) {
               .replace(/[^a-z0-9]+/g, '-')
               .replace(/(^-|-$)/g, '')
 
-            const [latestPost] = await db
-              .select({
-                tilId: posts.tilId,
-              })
-              .from(posts)
-              .orderBy(desc(posts.id))
-              .limit(1)
-
             await db.insert(posts).values({
               ...body,
               series: body.series !== '' ? body.series : null,
               longSlug,
-              tilId: (Number(latestPost.tilId) ?? 0) + 1,
               published: isPublished,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
             })
 
             set.redirect = `/admin/${body.slug}`
@@ -254,7 +231,6 @@ export default function (app: Elysia) {
               title: t.String(),
               body: t.String(),
               published: t.Optional(t.Literal('on')),
-              tilId: t.Optional(t.Numeric()),
               excerpt: t.String(),
               longSlug: t.Optional(t.String()),
             }),
@@ -273,9 +249,9 @@ export default function (app: Elysia) {
               .update(posts)
               .set({
                 ...body,
+                series: body.series !== '' ? body.series : null,
                 longSlug,
                 published: isPublished,
-                updatedAt: new Date().toISOString(),
               })
               .where(eq(posts.slug, body.slug))
 
@@ -294,7 +270,6 @@ export default function (app: Elysia) {
               title: t.String(),
               body: t.String(),
               published: t.Optional(t.Literal('on')),
-              tilId: t.Optional(t.Numeric()),
               excerpt: t.String(),
               longSlug: t.Optional(t.String()),
             }),

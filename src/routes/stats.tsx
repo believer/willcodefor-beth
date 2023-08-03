@@ -1,6 +1,6 @@
 import html from '@elysiajs/html'
 import elements from '@kitajs/html'
-import { eq, gt, sql } from 'drizzle-orm'
+import { eq, gt, gte, sql } from 'drizzle-orm'
 import Elysia, { t } from 'elysia'
 import userAgentParser from 'ua-parser-js'
 import { DataList } from '../components/datalist'
@@ -17,7 +17,7 @@ export default function (app: Elysia) {
           <BaseHtml noHeader>
             <div class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
               <div class="flex flex-col items-center justify-center text-center text-8xl font-bold">
-                <span hx-trigger="load" hx-get="/admin/stats/total-views">
+                <span hx-trigger="load" hx-get="/stats/total-views">
                   0
                 </span>
                 <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
@@ -27,7 +27,7 @@ export default function (app: Elysia) {
             </div>
             <div
               class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2"
-              hx-get="/admin/stats/user-agent"
+              hx-get="/stats/user-agent"
               hx-trigger="load"
             />
             <div class="mb-10">
@@ -36,7 +36,7 @@ export default function (app: Elysia) {
               </h3>
               <div
                 hx-trigger="load"
-                hx-get="/admin/stats/most-viewed"
+                hx-get="/stats/most-viewed"
                 id="most-viewed"
                 hx-swap="outerHTML"
               />
@@ -47,7 +47,7 @@ export default function (app: Elysia) {
               </h3>
               <div
                 hx-trigger="load"
-                hx-get="/admin/stats/most-viewed-today"
+                hx-get="/stats/most-viewed-today"
                 hx-swap="outerHTML"
               />
             </div>
@@ -82,7 +82,7 @@ export default function (app: Elysia) {
               title: posts.title,
               slug: posts.slug,
               createdAt: posts.createdAt,
-              tilId: posts.tilId,
+              id: posts.id,
               updatedAt: posts.updatedAt,
             })
             .from(postViews)
@@ -125,12 +125,12 @@ export default function (app: Elysia) {
             title: posts.title,
             slug: posts.slug,
             createdAt: posts.createdAt,
-            tilId: posts.tilId,
+            id: posts.id,
             updatedAt: posts.updatedAt,
           })
           .from(postViews)
           .innerJoin(posts, eq(posts.id, postViews.postId))
-          .where(gt(postViews.createdAt, sql`DATE('now', 'start of day')`))
+          .where(gte(postViews.createdAt, sql`CURRENT_DATE`))
           .groupBy(posts.id)
           .orderBy(sql`count DESC`)
 
@@ -142,7 +142,7 @@ export default function (app: Elysia) {
             userAgent: postViews.userAgent,
           })
           .from(postViews)
-          .where(gt(postViews.createdAt, sql`DATE('now', 'start of day')`))
+          .where(gt(postViews.createdAt, sql`CURRENT_DATE`))
 
         let os: Record<string, number> = {}
         let browser: Record<string, number> = {}

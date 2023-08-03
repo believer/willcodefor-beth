@@ -13,8 +13,8 @@ export default function (app: Elysia) {
       const latestPosts = await db
         .select({
           createdAt: posts.createdAt,
+          id: posts.id,
           slug: posts.slug,
-          tilId: posts.tilId,
           title: posts.title,
         })
         .from(posts)

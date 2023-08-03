@@ -20,7 +20,7 @@ export default function (app: Elysia) {
             updatedAt: posts.updatedAt,
             slug: posts.slug,
             title: posts.title,
-            tilId: posts.tilId,
+            id: posts.id,
           }
 
           // TODO: Handle search and sort
@@ -95,7 +95,6 @@ export default function (app: Elysia) {
               body: posts.body,
               createdAt: posts.createdAt,
               id: posts.id,
-              tilId: posts.tilId,
               title: posts.title,
               updatedAt: posts.updatedAt,
               series: posts.series,
@@ -173,7 +172,7 @@ export default function (app: Elysia) {
         { params: t.Object({ id: t.String() }) }
       )
       .get(
-        '/next/:tilId',
+        '/next/:id',
         async ({ html, params }) => {
           const [nextPost] = await db
             .select({
@@ -181,9 +180,7 @@ export default function (app: Elysia) {
               title: posts.title,
             })
             .from(posts)
-            .where(
-              and(eq(posts.tilId, params.tilId + 1), eq(posts.published, true))
-            )
+            .where(and(eq(posts.id, params.id + 1), eq(posts.published, true)))
 
           if (!nextPost) {
             return <div />
@@ -202,11 +199,11 @@ export default function (app: Elysia) {
           )
         },
         {
-          params: t.Object({ tilId: t.Numeric() }),
+          params: t.Object({ id: t.Numeric() }),
         }
       )
       .get(
-        '/previous/:tilId',
+        '/previous/:id',
         async ({ html, params }) => {
           const [previousPost] = await db
             .select({
@@ -214,9 +211,7 @@ export default function (app: Elysia) {
               title: posts.title,
             })
             .from(posts)
-            .where(
-              and(eq(posts.tilId, params.tilId - 1), eq(posts.published, true))
-            )
+            .where(and(eq(posts.id, params.id - 1), eq(posts.published, true)))
 
           if (!previousPost) {
             return <div />
@@ -235,7 +230,7 @@ export default function (app: Elysia) {
           )
         },
         {
-          params: t.Object({ tilId: t.Numeric() }),
+          params: t.Object({ id: t.Numeric() }),
         }
       )
   )

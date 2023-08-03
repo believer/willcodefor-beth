@@ -8,7 +8,7 @@ import Work from './work'
 import { ExternalLink } from './link'
 
 type Props = {
-  latestPosts: Pick<Post, 'slug' | 'title' | 'tilId' | 'createdAt'>[]
+  latestPosts: Pick<Post, 'slug' | 'title' | 'id' | 'createdAt'>[]
 }
 
 export function Home({ latestPosts }: Props) {
@@ -61,7 +61,7 @@ export function Home({ latestPosts }: Props) {
             {latestPosts.map((post) => (
               <li
                 class="til-counter grid-post relative grid w-full items-baseline gap-4 sm:inline-flex sm:gap-5"
-                data-til={post.tilId}
+                data-til={post.id}
               >
                 <a href={`/posts/${post.slug}`}>{post.title}</a>
                 <hr class="m-0 hidden flex-1 border-dashed border-gray-300 dark:border-gray-600 sm:block" />

@@ -18,12 +18,10 @@ export const postViews = pgTable(
     createdAt: timestamp('createdAt', { precision: 3, mode: 'string' })
       .defaultNow()
       .notNull(),
-    postId: text('postId')
+    postId: integer('post_id')
+      .default(0)
       .notNull()
-      .references(() => posts.id, {
-        onDelete: 'restrict',
-        onUpdate: 'cascade',
-      }),
+      .references(() => posts.id),
     userAgent: text('userAgent').notNull(),
   },
   (table) => {
@@ -36,7 +34,6 @@ export const postViews = pgTable(
 export const posts = pgTable(
   'Post',
   {
-    id: serial('id').primaryKey().notNull(),
     title: text('title').notNull(),
     body: text('body').notNull(),
     excerpt: text('excerpt').notNull(),
@@ -48,8 +45,10 @@ export const posts = pgTable(
     updatedAt: timestamp('updatedAt', {
       precision: 3,
       mode: 'string',
-    }).notNull(),
-    tilId: integer('tilId').notNull(),
+    })
+      .defaultNow()
+      .notNull(),
+    id: serial('id').primaryKey().notNull(),
     language: text('language').default('en').notNull(),
     longSlug: text('longSlug').notNull(),
     published: boolean('published').default(false).notNull(),
@@ -86,12 +85,7 @@ export const postTag = pgTable(
   'Post_Tag',
   {
     id: serial('id').primaryKey().notNull(),
-    postId: text('post_id')
-      .notNull()
-      .references(() => posts.id, {
-        onDelete: 'restrict',
-        onUpdate: 'restrict',
-      }),
+    postId: text('post_id').notNull(),
     tagId: integer('tag_id')
       .notNull()
       .references(() => tag.id, { onDelete: 'restrict', onUpdate: 'restrict' }),
