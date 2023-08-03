@@ -7,6 +7,7 @@ import { Posts } from '../components/posts'
 import { Series } from '../components/series'
 import { db } from '../db'
 import { postViews, posts } from '../db/schema'
+import { BaseHtml } from '../components/layout'
 
 export default function (app: Elysia) {
   return app.use(elysiaHtml()).group('/posts', (app) =>
@@ -108,6 +109,17 @@ export default function (app: Elysia) {
               or(eq(posts.slug, params.slug), eq(posts.longSlug, params.slug))
             )
             .get()
+
+          if (!post) {
+            return html(
+              <BaseHtml>
+                <div>
+                  The post <strong>{params.slug}</strong> does not exist.{' '}
+                  <a href="/posts">Go back to the posts page.</a>
+                </div>
+              </BaseHtml>
+            )
+          }
 
           return html(<Post {...post} slug={params.slug} />)
         },
