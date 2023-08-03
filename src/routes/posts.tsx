@@ -1,4 +1,4 @@
-import { html as elysiaHtml } from '@elysiajs/html'
+import { html } from '@elysiajs/html'
 import elements from '@kitajs/html'
 import { and, desc, eq, like, or, sql } from 'drizzle-orm'
 import { Elysia, t } from 'elysia'
@@ -10,7 +10,7 @@ import { postView, post } from '../db/schema'
 import { BaseHtml } from '../components/layout'
 
 export default function (app: Elysia) {
-  return app.use(elysiaHtml()).group('/posts', (app) =>
+  return app.use(html()).group('/posts', (app) =>
     app
       .get(
         '',
