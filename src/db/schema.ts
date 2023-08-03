@@ -26,6 +26,7 @@ export const posts = sqliteTable(
     return {
       tilIdIdx: index('til_id_idx').on(table.tilId),
       sludIdx: index('slug_idx').on(table.slug),
+      seriesIdx: index('series_idx').on(table.series),
     }
   }
 )
