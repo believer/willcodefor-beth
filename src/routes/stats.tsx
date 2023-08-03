@@ -7,7 +7,7 @@ import { DataList } from '../components/datalist'
 import { BaseHtml } from '../components/layout'
 import PostList from '../components/postList'
 import { db } from '../db'
-import { postViews, posts } from '../db/schema'
+import { postView, post } from '../db/schema'
 
 export default function (app: Elysia) {
   return app.use(html()).group('/stats', (app) =>
@@ -59,7 +59,7 @@ export default function (app: Elysia) {
           .select({
             totalViews: sql<number>`COUNT(id)`,
           })
-          .from(postViews)
+          .from(postView)
 
         return html(<div>{totalViews}</div>)
       })
@@ -68,7 +68,7 @@ export default function (app: Elysia) {
           .select({
             viewsPerDay: sql<number>`ROUND((COUNT(id) / (JULIANDAY(max("createdAt")) - JULIANDAY(min("createdAt")) + 1)), 2)`,
           })
-          .from(postViews)
+          .from(postView)
 
         return html(<div>{viewsPerDay}</div>)
       })
@@ -78,26 +78,26 @@ export default function (app: Elysia) {
           const page = query.page || 1
           const data = await db
             .select({
-              views: sql<number>`COUNT(${postViews.id}) as count`,
-              title: posts.title,
-              slug: posts.slug,
-              createdAt: posts.createdAt,
-              id: posts.id,
-              updatedAt: posts.updatedAt,
+              views: sql<number>`COUNT(${postView.id}) as count`,
+              title: post.title,
+              slug: post.slug,
+              createdAt: post.createdAt,
+              id: post.id,
+              updatedAt: post.updatedAt,
             })
-            .from(postViews)
-            .innerJoin(posts, eq(posts.id, postViews.postId))
-            .groupBy(posts.id)
+            .from(postView)
+            .innerJoin(post, eq(post.id, postView.postId))
+            .groupBy(post.id)
             .orderBy(sql`count DESC`)
             .offset(10 * (page - 1))
             .limit(10)
 
           const postsWithViews = await db
             .select({
-              postId: postViews.postId,
+              postId: postView.postId,
             })
-            .from(postViews)
-            .groupBy(postViews.postId)
+            .from(postView)
+            .groupBy(postView.postId)
 
           const hasMore = postsWithViews.length > 10 * page
 
@@ -121,17 +121,17 @@ export default function (app: Elysia) {
       .get('/most-viewed-today', async ({ html }) => {
         const data = await db
           .select({
-            views: sql<number>`COUNT(${postViews.id}) as count`,
-            title: posts.title,
-            slug: posts.slug,
-            createdAt: posts.createdAt,
-            id: posts.id,
-            updatedAt: posts.updatedAt,
+            views: sql<number>`COUNT(${postView.id}) as count`,
+            title: post.title,
+            slug: post.slug,
+            createdAt: post.createdAt,
+            id: post.id,
+            updatedAt: post.updatedAt,
           })
-          .from(postViews)
-          .innerJoin(posts, eq(posts.id, postViews.postId))
-          .where(gte(postViews.createdAt, sql`CURRENT_DATE`))
-          .groupBy(posts.id)
+          .from(postView)
+          .innerJoin(post, eq(post.id, postView.postId))
+          .where(gte(postView.createdAt, sql`CURRENT_DATE`))
+          .groupBy(post.id)
           .orderBy(sql`count DESC`)
 
         return html(<PostList posts={data} sort="views" />)
@@ -139,10 +139,10 @@ export default function (app: Elysia) {
       .get('/user-agent', async ({ html }) => {
         const data = await db
           .select({
-            userAgent: postViews.userAgent,
+            userAgent: postView.userAgent,
           })
-          .from(postViews)
-          .where(gt(postViews.createdAt, sql`CURRENT_DATE`))
+          .from(postView)
+          .where(gt(postView.createdAt, sql`CURRENT_DATE`))
 
         let os: Record<string, number> = {}
         let browser: Record<string, number> = {}

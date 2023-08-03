@@ -4,7 +4,7 @@ import { desc, eq } from 'drizzle-orm'
 import Elysia, { t } from 'elysia'
 import { BaseHtml } from '../components/layout'
 import { db } from '../db'
-import { Post, posts } from '../db/schema'
+import { Post, post } from '../db/schema'
 import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'
 
@@ -36,12 +36,12 @@ export default function (app: Elysia) {
         .get('', async ({ html }) => {
           const allPosts = await db
             .select({
-              published: posts.published,
-              title: posts.title,
-              slug: posts.slug,
+              published: post.published,
+              title: post.title,
+              slug: post.slug,
             })
-            .from(posts)
-            .orderBy(desc(posts.id))
+            .from(post)
+            .orderBy(desc(post.id))
 
           return html(
             <BaseHtml noHeader>
@@ -70,7 +70,7 @@ export default function (app: Elysia) {
         .get(
           '/:slug',
           async ({ html, params }) => {
-            let post = {
+            let postData = {
               body: '',
               excerpt: '',
               longSlug: '',
@@ -83,13 +83,13 @@ export default function (app: Elysia) {
             const isNewPost = params.slug === 'new'
 
             if (!isNewPost) {
-              ;[post] = await db
+              ;[postData] = await db
                 .select()
-                .from(posts)
-                .where(eq(posts.slug, params.slug))
+                .from(post)
+                .where(eq(post.slug, params.slug))
             }
 
-            const isDraft = !isNewPost && !post.published
+            const isDraft = !isNewPost && !postData.published
 
             return html(
               <BaseHtml noHeader path="/admin">
@@ -99,15 +99,15 @@ export default function (app: Elysia) {
                     <span class="text-gray-500 dark:text-gray-600">
                       Last updated:{' '}
                       <span id="update-time">
-                        {formatDateTime(post.updatedAt, 'medium')}
+                        {formatDateTime(postData.updatedAt, 'medium')}
                       </span>
                     </span>
                   ) : null}
                 </div>
                 <form
-                  action={isNewPost ? `/admin/${post.slug}` : undefined}
+                  action={isNewPost ? `/admin/${postData.slug}` : undefined}
                   method={isNewPost ? 'POST' : undefined}
-                  hx-patch={!isNewPost ? `/admin/${post.slug}` : undefined}
+                  hx-patch={!isNewPost ? `/admin/${postData.slug}` : undefined}
                   hx-trigger={
                     isDraft
                       ? 'submit, every 1m'
@@ -121,7 +121,7 @@ export default function (app: Elysia) {
                     class="my-8 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                     type="text"
                     name="title"
-                    value={post.title}
+                    value={postData.title}
                     required="true"
                   />
                   <div class="grid grid-cols-2 gap-10">
@@ -133,13 +133,13 @@ export default function (app: Elysia) {
                       hx-target="#preview"
                       hx-trigger="keyup changed delay:500ms"
                     >
-                      {elements.escapeHtml(post.body)}
+                      {elements.escapeHtml(postData.body)}
                     </textarea>
                     <div
                       class="prose dark:prose-invert dark:prose-dark"
                       id="preview"
                     >
-                      {md.render(post.body)}
+                      {md.render(postData.body)}
                     </div>
                   </div>
                   <section class="mt-8 space-y-2">
@@ -150,7 +150,7 @@ export default function (app: Elysia) {
                       name="slug"
                       placeholder="Slug"
                       required="true"
-                      value={post.slug === 'new' ? '' : post.slug}
+                      value={postData.slug === 'new' ? '' : postData.slug}
                     />
                     <input
                       class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
@@ -158,7 +158,7 @@ export default function (app: Elysia) {
                       readonly="true"
                       placeholder="Long Slug"
                       type="text"
-                      value={post.longSlug}
+                      value={postData.longSlug}
                     />
                     <input
                       class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
@@ -166,19 +166,19 @@ export default function (app: Elysia) {
                       placeholder="Excerpt"
                       type="text"
                       required="true"
-                      value={post.excerpt}
+                      value={postData.excerpt}
                     />
                     <input
                       class="block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                       type="text"
                       name="series"
                       placeholder="Series"
-                      value={post.series ?? ''}
+                      value={postData.series ?? ''}
                     />
                     <input
                       type="checkbox"
                       name="published"
-                      checked={post.published}
+                      checked={postData.published}
                     />
                   </section>
                   <footer class="flex justify-end mt-4 gap-2">
@@ -186,7 +186,7 @@ export default function (app: Elysia) {
                       <button
                         class="px-4 py-2 bg-red-400"
                         hx-confirm="Are you sure you want to delete this post?"
-                        hx-delete={`/admin/${post.slug}`}
+                        hx-delete={`/admin/${postData.slug}`}
                       >
                         Delete
                       </button>
@@ -212,7 +212,7 @@ export default function (app: Elysia) {
               .replace(/[^a-z0-9]+/g, '-')
               .replace(/(^-|-$)/g, '')
 
-            await db.insert(posts).values({
+            await db.insert(post).values({
               ...body,
               series: body.series !== '' ? body.series : null,
               longSlug,
@@ -246,14 +246,14 @@ export default function (app: Elysia) {
               .replace(/(^-|-$)/g, '')
 
             await db
-              .update(posts)
+              .update(post)
               .set({
                 ...body,
                 series: body.series !== '' ? body.series : null,
                 longSlug,
                 published: isPublished,
               })
-              .where(eq(posts.slug, body.slug))
+              .where(eq(post.slug, body.slug))
 
             return new Intl.DateTimeFormat('sv-SE', {
               dateStyle: 'short',
@@ -278,7 +278,7 @@ export default function (app: Elysia) {
         .delete(
           '/:slug',
           async ({ params }) => {
-            await db.delete(posts).where(eq(posts.slug, params.slug))
+            await db.delete(post).where(eq(post.slug, params.slug))
 
             return new Response(null, {
               headers: {

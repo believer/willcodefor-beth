@@ -6,7 +6,7 @@ import { Post } from '../components/post'
 import { Posts } from '../components/posts'
 import { Series } from '../components/series'
 import { db } from '../db'
-import { postViews, posts } from '../db/schema'
+import { postView, post } from '../db/schema'
 import { BaseHtml } from '../components/layout'
 
 export default function (app: Elysia) {
@@ -16,11 +16,11 @@ export default function (app: Elysia) {
         '',
         async ({ html, query }) => {
           const commonValues = {
-            createdAt: posts.createdAt,
-            updatedAt: posts.updatedAt,
-            slug: posts.slug,
-            title: posts.title,
-            id: posts.id,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt,
+            slug: post.slug,
+            title: post.title,
+            id: post.id,
           }
 
           // TODO: Handle search and sort
@@ -28,17 +28,17 @@ export default function (app: Elysia) {
           if (query.search) {
             const data = await db
               .select(commonValues)
-              .from(posts)
+              .from(post)
               .where(
                 and(
                   or(
-                    like(posts.title, `%${query.search}%`),
-                    like(posts.body, `%${query.search}%`)
+                    like(post.title, `%${query.search}%`),
+                    like(post.body, `%${query.search}%`)
                   ),
-                  eq(posts.published, true)
+                  eq(post.published, true)
                 )
               )
-              .orderBy(desc(posts.id))
+              .orderBy(desc(post.id))
 
             return html(<Posts posts={data} search={query.search} />)
           }
@@ -48,29 +48,29 @@ export default function (app: Elysia) {
             const data = await db
               .select({
                 ...commonValues,
-                views: sql<number>`COUNT(${postViews.id}) as views`,
+                views: sql<number>`COUNT(${postView.id}) as views`,
               })
-              .from(posts)
-              .innerJoin(postViews, eq(postViews.postId, posts.id))
-              .groupBy(posts.id)
+              .from(post)
+              .innerJoin(postView, eq(postView.postId, post.id))
+              .groupBy(post.id)
               .orderBy(desc(sql`views`))
-              .where(eq(posts.published, true))
+              .where(eq(post.published, true))
 
             return html(<Posts posts={data} sort="views" />)
           }
 
           // Handle date sorting
-          let sortOrder = desc(posts.id)
+          let sortOrder = desc(post.id)
 
           if (query.sort === 'updatedAt') {
-            sortOrder = desc(posts.updatedAt)
+            sortOrder = desc(post.updatedAt)
           }
 
           const data = await db
             .select(commonValues)
-            .from(posts)
+            .from(post)
             .orderBy(sortOrder)
-            .where(eq(posts.published, true))
+            .where(eq(post.published, true))
 
           return html(<Posts posts={data} sort={query.sort} />)
         },
@@ -90,22 +90,22 @@ export default function (app: Elysia) {
       .get(
         '/:slug',
         async ({ html, params }) => {
-          const [post] = await db
+          const [foundPost] = await db
             .select({
-              body: posts.body,
-              createdAt: posts.createdAt,
-              id: posts.id,
-              title: posts.title,
-              updatedAt: posts.updatedAt,
-              series: posts.series,
-              excerpt: posts.excerpt,
+              body: post.body,
+              createdAt: post.createdAt,
+              id: post.id,
+              title: post.title,
+              updatedAt: post.updatedAt,
+              series: post.series,
+              excerpt: post.excerpt,
             })
-            .from(posts)
+            .from(post)
             .where(
-              or(eq(posts.slug, params.slug), eq(posts.longSlug, params.slug))
+              or(eq(post.slug, params.slug), eq(post.longSlug, params.slug))
             )
 
-          if (!post) {
+          if (!foundPost) {
             return html(
               <BaseHtml>
                 <div>
@@ -116,7 +116,7 @@ export default function (app: Elysia) {
             )
           }
 
-          return html(<Post {...post} slug={params.slug} />)
+          return html(<Post {...foundPost} slug={params.slug} />)
         },
         { params: t.Object({ slug: t.String() }) }
       )
@@ -125,14 +125,14 @@ export default function (app: Elysia) {
         async ({ html, params, query }) => {
           const series = await db
             .select({
-              slug: posts.slug,
-              title: posts.title,
+              slug: post.slug,
+              title: post.title,
             })
-            .from(posts)
+            .from(post)
             .where(
-              and(eq(posts.series, params.series), eq(posts.published, true))
+              and(eq(post.series, params.series), eq(post.published, true))
             )
-            .orderBy(desc(posts.id))
+            .orderBy(desc(post.id))
 
           return html(
             <Series posts={series} series={params.series} title={query.title} />
@@ -153,7 +153,7 @@ export default function (app: Elysia) {
 
           // Update views
           if (isProduction && headers['user-agent'] && !isGoogleBot) {
-            await db.insert(postViews).values({
+            await db.insert(postView).values({
               postId: params.id,
               userAgent: headers['user-agent'],
             })
@@ -164,8 +164,8 @@ export default function (app: Elysia) {
             .select({
               count: sql<number>`COUNT(*)`,
             })
-            .from(postViews)
-            .where(eq(postViews.postId, params.id))
+            .from(postView)
+            .where(eq(postView.postId, params.id))
 
           return html(<span>{stats.count}</span>)
         },
@@ -176,11 +176,11 @@ export default function (app: Elysia) {
         async ({ html, params }) => {
           const [nextPost] = await db
             .select({
-              slug: posts.slug,
-              title: posts.title,
+              slug: post.slug,
+              title: post.title,
             })
-            .from(posts)
-            .where(and(eq(posts.id, params.id + 1), eq(posts.published, true)))
+            .from(post)
+            .where(and(eq(post.id, params.id + 1), eq(post.published, true)))
 
           if (!nextPost) {
             return <div />
@@ -207,11 +207,11 @@ export default function (app: Elysia) {
         async ({ html, params }) => {
           const [previousPost] = await db
             .select({
-              slug: posts.slug,
-              title: posts.title,
+              slug: post.slug,
+              title: post.title,
             })
-            .from(posts)
-            .where(and(eq(posts.id, params.id - 1), eq(posts.published, true)))
+            .from(post)
+            .where(and(eq(post.id, params.id - 1), eq(post.published, true)))
 
           if (!previousPost) {
             return <div />

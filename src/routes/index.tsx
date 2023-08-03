@@ -4,7 +4,7 @@ import { and, desc, eq, like } from 'drizzle-orm'
 import Elysia from 'elysia'
 import { Home } from '../components/home'
 import { db } from '../db'
-import { posts } from '../db/schema'
+import { post } from '../db/schema'
 
 export default function (app: Elysia) {
   return app
@@ -12,14 +12,14 @@ export default function (app: Elysia) {
     .get('/', async ({ html }) => {
       const latestPosts = await db
         .select({
-          createdAt: posts.createdAt,
-          id: posts.id,
-          slug: posts.slug,
-          title: posts.title,
+          createdAt: post.createdAt,
+          id: post.id,
+          slug: post.slug,
+          title: post.title,
         })
-        .from(posts)
-        .orderBy(desc(posts.id))
-        .where(eq(posts.published, true))
+        .from(post)
+        .orderBy(desc(post.id))
+        .where(eq(post.published, true))
         .limit(5)
 
       return html(<Home latestPosts={latestPosts} />)
@@ -29,12 +29,12 @@ export default function (app: Elysia) {
         .get('/open', async ({ html }) => {
           const data = await db
             .select({
-              slug: posts.slug,
-              title: posts.title,
+              slug: post.slug,
+              title: post.title,
             })
-            .from(posts)
-            .orderBy(desc(posts.id))
-            .where(eq(posts.published, true))
+            .from(post)
+            .orderBy(desc(post.id))
+            .where(eq(post.published, true))
             .limit(5)
 
           return html(
@@ -86,15 +86,15 @@ export default function (app: Elysia) {
         .get('/search', async ({ html, query }) => {
           const data = await db
             .select({
-              slug: posts.slug,
-              title: posts.title,
+              slug: post.slug,
+              title: post.title,
             })
-            .from(posts)
-            .orderBy(desc(posts.id))
+            .from(post)
+            .orderBy(desc(post.id))
             .where(
               and(
-                eq(posts.published, true),
-                like(posts.title, `%${query.search}%`)
+                eq(post.published, true),
+                like(post.title, `%${query.search}%`)
               )
             )
             .limit(5)

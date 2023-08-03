@@ -1,7 +1,7 @@
 import { desc, eq } from 'drizzle-orm'
 import { Elysia } from 'elysia'
 import { db } from '../db'
-import { Post, posts } from '../db/schema'
+import { Post, post } from '../db/schema'
 import { md } from '../utils/markdown'
 
 const metadata = {
@@ -77,14 +77,14 @@ export default function (app: Elysia) {
     .get('/feed.xml', async ({ xml }) => {
       const data = await db
         .select({
-          body: posts.body,
-          slug: posts.slug,
-          title: posts.title,
-          updatedAt: posts.updatedAt,
+          body: post.body,
+          slug: post.slug,
+          title: post.title,
+          updatedAt: post.updatedAt,
         })
-        .from(posts)
-        .orderBy(desc(posts.id))
-        .where(eq(posts.published, true))
+        .from(post)
+        .orderBy(desc(post.id))
+        .where(eq(post.published, true))
 
       const feed = generateFeed(data)
 
@@ -93,12 +93,12 @@ export default function (app: Elysia) {
     .get('/sitemap.xml', async ({ xml }) => {
       const data = await db
         .select({
-          slug: posts.slug,
-          updatedAt: posts.updatedAt,
+          slug: post.slug,
+          updatedAt: post.updatedAt,
         })
-        .from(posts)
-        .orderBy(desc(posts.id))
-        .where(eq(posts.published, true))
+        .from(post)
+        .orderBy(desc(post.id))
+        .where(eq(post.published, true))
 
       const sitemap = generateSitemap(data)
 
