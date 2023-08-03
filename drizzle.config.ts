@@ -6,10 +6,10 @@ dotenv.config()
 export default {
   schema: './src/db/schema.ts',
   out: './src/db',
-  // driver: 'turso',
   driver: 'pg',
   dbCredentials: {
     connectionString: process.env.DATABASE_URL!,
-    // authToken: process.env.DATABASE_AUTH_TOKEN!,
   },
+  verbose: true, // Print out all SQL statements that are executed during push:pg update
+  strict: true, // Ask for confirmation before executing push:pg update
 } satisfies Config
