@@ -194,7 +194,12 @@ export default function (app: Elysia) {
               totalViews: sql<number>`COUNT(id)`,
             })
             .from(postView)
-            .where(gte(postView.createdAt, timeToSql(query.time)))
+            .where(
+              and(
+                gte(postView.createdAt, timeToSql(query.time as Time)),
+                eq(postView.isBot, false)
+              )
+            )
 
           return html(<div>{totalViews}</div>)
         },
@@ -397,6 +402,7 @@ ORDER BY 1 ASC`
           count(pv.id)::int
         FROM days
         LEFT JOIN post_view AS pv ON DATE_TRUNC('day', created_at) = days.day
+        WHERE pv.is_bot = false
         GROUP BY 1
         ORDER BY 1 ASC`
         }
@@ -430,6 +436,7 @@ SELECT
 FROM
 	months
 	LEFT JOIN post_view AS pv ON DATE_TRUNC('month', created_at) = date_trunc('month', months.month)
+WHERE pv.is_bot = false
 GROUP BY 1
 ORDER BY 1 ASC`
         }
@@ -440,7 +447,7 @@ ORDER BY 1 ASC`
   select
     date_trunc('day', created_at) as day,
     count(1)::int
-  from post_view group by 1
+  from post_view WHERE is_bot = false group by 1
 )
 
 select
@@ -510,6 +517,7 @@ from data`
             viewsPerDay: sql`ROUND((COUNT(id) / (max(${postView.createdAt})::DATE - min(${postView.createdAt})::DATE + 1)::NUMERIC), 2)`,
           })
           .from(postView)
+          .where(eq(postView.isBot, false))
 
         return html(<div>{viewsPerDay}</div>)
       })
