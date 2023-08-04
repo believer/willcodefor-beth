@@ -58,6 +58,7 @@ export default function (app: Elysia) {
                       class="text-red-400"
                       hx-confirm="Are you sure you want to delete this post?"
                       hx-delete={`/admin/${post.slug}`}
+                      hx-target="closest li"
                     >
                       Delete
                     </button>
@@ -187,6 +188,7 @@ export default function (app: Elysia) {
                         class="px-4 py-2 bg-red-400"
                         hx-confirm="Are you sure you want to delete this post?"
                         hx-delete={`/admin/${postData.slug}`}
+                        id="post-delete"
                       >
                         Delete
                       </button>
@@ -277,14 +279,19 @@ export default function (app: Elysia) {
         )
         .delete(
           '/:slug',
-          async ({ params }) => {
+          async ({ params, headers }) => {
             await db.delete(post).where(eq(post.slug, params.slug))
 
-            return new Response(null, {
-              headers: {
-                'HX-Redirect': '/admin',
-              },
-            })
+            if (headers['hx-trigger'] === 'post-delete') {
+              return new Response(null, {
+                status: 303,
+                headers: {
+                  'HX-Redirect': '/admin',
+                },
+              })
+            } else {
+              return ''
+            }
           },
           {
             params: t.Object({
