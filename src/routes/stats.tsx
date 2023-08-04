@@ -425,7 +425,7 @@ ORDER BY 1 ASC`
 )
 SELECT
 	months.month AS DATE,
-	TO_CHAR(months.month, 'Mon') AS LABEL,
+	TO_CHAR(months.month, 'Mon YY') AS LABEL,
 	COUNT(pv.id)::INT
 FROM
 	months
