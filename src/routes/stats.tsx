@@ -9,20 +9,52 @@ import { db } from '../db'
 import { post, postView } from '../db/schema'
 import { parsePercent } from '../utils/intl'
 
-const timeToSql = (time?: string) => {
+const Time = {
+  CUMULATIVE: 'cumulative',
+  SINCE_START: 'since-start',
+  THIRTY_DAYS: 'thirty-days',
+  THIS_YEAR: 'this-year',
+  TODAY: 'today',
+  WEEK: 'week',
+} as const
+
+type ObjectValues<T> = T[keyof T]
+type Time = ObjectValues<typeof Time>
+
+const timeToSql = (time: Time) => {
   switch (time) {
-    case 'week':
+    case Time.WEEK:
       return sql`date_trunc('week', CURRENT_DATE)`
-    case 'thirty-days':
+    case Time.THIRTY_DAYS:
       return sql`CURRENT_DATE - '30 days'::interval`
-    case 'this-year':
+    case Time.THIS_YEAR:
       return sql`date_trunc('year', CURRENT_DATE)`
-    case 'since-start':
-    case 'cumulative':
+    case Time.SINCE_START:
+    case Time.CUMULATIVE:
       return sql`(SELECT min(${postView.createdAt}) from ${postView})`
     default:
       return sql`CURRENT_DATE`
   }
+}
+
+const TimeButton = ({
+  children,
+  isActive,
+  time,
+}: elements.PropsWithChildren<{ isActive: boolean; time: Time }>) => {
+  return (
+    <a
+      class={clsx(
+        'py-2 px-4 block rounded no-underline',
+        isActive
+          ? 'bg-tokyoNight-blue text-brandBlue-800'
+          : 'bg-gray-800 text-brandBlue-200'
+      )}
+      href={`/stats?time=${time}`}
+    >
+      {children}
+    </a>
+  )
 }
 
 export default function (app: Elysia) {
@@ -44,78 +76,48 @@ export default function (app: Elysia) {
               }
             >
               <div class="flex gap-4 mt-4 items-center justify-center">
-                <a
-                  class={clsx(
-                    'py-2 px-4 block rounded no-underline',
-                    !query.time || query.time === 'today'
-                      ? 'bg-tokyoNight-blue text-brandBlue-800'
-                      : 'bg-gray-800 text-brandBlue-200'
-                  )}
-                  href="/stats?time=today"
+                <TimeButton
+                  isActive={!query.time || query.time === Time.TODAY}
+                  time={Time.TODAY}
                 >
                   Today
-                </a>
-                <a
-                  class={clsx(
-                    'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
-                    query.time === 'week'
-                      ? 'bg-tokyoNight-blue text-brandBlue-800'
-                      : 'bg-gray-800 text-brandBlue-200'
-                  )}
-                  href="/stats?time=week"
+                </TimeButton>
+                <TimeButton
+                  isActive={query.time === Time.WEEK}
+                  time={Time.WEEK}
                 >
                   Week
-                </a>
-                <a
-                  class={clsx(
-                    'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
-                    query.time === 'thirty-days'
-                      ? 'bg-tokyoNight-blue text-brandBlue-800'
-                      : 'bg-gray-800 text-brandBlue-200'
-                  )}
-                  href="/stats?time=thirty-days"
+                </TimeButton>
+                <TimeButton
+                  isActive={query.time === Time.THIRTY_DAYS}
+                  time={Time.THIRTY_DAYS}
                 >
                   30 days
-                </a>
-                <a
-                  class={clsx(
-                    'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
-                    query.time === 'this-year'
-                      ? 'bg-tokyoNight-blue text-brandBlue-800'
-                      : 'bg-gray-800 text-brandBlue-200'
-                  )}
-                  href="/stats?time=this-year"
+                </TimeButton>
+                <TimeButton
+                  isActive={query.time === Time.THIS_YEAR}
+                  time={Time.THIS_YEAR}
                 >
                   This year
-                </a>
-                <a
-                  class={clsx(
-                    'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
-                    query.time === 'since-start'
-                      ? 'bg-tokyoNight-blue text-brandBlue-800'
-                      : 'bg-gray-800 text-brandBlue-200'
-                  )}
-                  href="/stats?time=since-start"
+                </TimeButton>
+                <TimeButton
+                  isActive={query.time === Time.SINCE_START}
+                  time={Time.SINCE_START}
                 >
                   Since start
-                </a>
-                <a
-                  class={clsx(
-                    'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
-                    query.time === 'cumulative'
-                      ? 'bg-tokyoNight-blue text-brandBlue-800'
-                      : 'bg-gray-800 text-brandBlue-200'
-                  )}
-                  href="/stats?time=cumulative"
+                </TimeButton>
+                <TimeButton
+                  isActive={query.time === Time.CUMULATIVE}
+                  time={Time.CUMULATIVE}
                 >
                   Cumulative
-                </a>
+                </TimeButton>
               </div>
               <hr class="my-10" />
               <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 items-start">
-                <div>
-                  <div class="flex flex-col items-center justify-center text-center text-8xl font-bold">
-                    <span
+                <div class="text-center text-8xl font-bold space-y-8">
+                  <div>
+                    <div
                       hx-trigger="load"
                       hx-get={`/stats/total-views?time=${query.time}`}
                       hx-swap="outerHTML"
@@ -123,23 +125,23 @@ export default function (app: Elysia) {
                       <span class="text-gray-500 font-thin tabular-nums">
                         -----
                       </span>
-                    </span>
+                    </div>
                     <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
                       Total views
                     </div>
-                    <div class="flex flex-col items-center justify-center text-center text-8xl font-bold mt-8">
-                      <span
-                        hx-swap="outerHTML"
-                        hx-trigger="load"
-                        hx-get="/stats/average-views"
-                      >
-                        <span class="text-gray-500 font-thin tabular-nums">
-                          -----
-                        </span>
+                  </div>
+                  <div>
+                    <div
+                      hx-swap="outerHTML"
+                      hx-trigger="load"
+                      hx-get="/stats/average-views"
+                    >
+                      <span class="text-gray-500 font-thin tabular-nums">
+                        -----
                       </span>
-                      <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
-                        Views per day (average)
-                      </div>
+                    </div>
+                    <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
+                      Views per day (average)
                     </div>
                   </div>
                 </div>
@@ -163,7 +165,6 @@ export default function (app: Elysia) {
                 <div
                   hx-trigger="load"
                   hx-get="/stats/most-viewed"
-                  id="most-viewed"
                   hx-swap="outerHTML"
                 />
               </div>
@@ -249,14 +250,7 @@ export default function (app: Elysia) {
           const hasMore = postsWithViews.length > 10 * page
 
           return html(
-            <div id="most-viewed">
-              <PostList
-                posts={data}
-                sort="views"
-                hasMore={hasMore}
-                page={page}
-              />
-            </div>
+            <PostList posts={data} sort="views" hasMore={hasMore} page={page} />
           )
         },
         {
@@ -299,7 +293,7 @@ export default function (app: Elysia) {
             .from(postView)
             .where(
               and(
-                gt(postView.createdAt, timeToSql(query.time)),
+                gt(postView.createdAt, timeToSql(query.time as Time)),
                 eq(postView.isBot, false)
               )
             )
@@ -367,8 +361,7 @@ export default function (app: Elysia) {
 SELECT
 	days.hour as date,
   to_char(days.hour, 'HH24:MI') as label,
-  count(pv.id)::int,
-	case when count(pv.id) > 0 then json_agg(json_build_object('title', p.title, 'slug', p.slug)) else '[]' end as posts
+  count(pv.id)::int as count
 FROM days
 LEFT JOIN post_view AS pv ON DATE_TRUNC('hour', created_at) = days.hour
 LEFT JOIN post AS p ON p.id = pv.post_id
@@ -383,7 +376,7 @@ ORDER BY 1 ASC`
 SELECT
 	days.day as date,
   to_char(days.day, 'Mon DD') as label,
-  count(pv.id)::int
+  count(pv.id)::int as count
 FROM days
 LEFT JOIN post_view AS pv ON DATE_TRUNC('day', created_at) = days.day
 GROUP BY 1
@@ -399,7 +392,7 @@ ORDER BY 1 ASC`
         SELECT
         	days.day as date,
           to_char(days.day, 'Mon DD') as label,
-          count(pv.id)::int
+          count(pv.id)::int as count
         FROM days
         LEFT JOIN post_view AS pv ON DATE_TRUNC('day', created_at) = days.day
         WHERE pv.is_bot = false
@@ -416,7 +409,7 @@ ORDER BY 1 ASC`
 SELECT
   months.month as date,
 	to_char(months.month, 'Mon') as label,
-  COUNT(pv.id)::int
+  COUNT(pv.id)::int as count
 FROM
 	months
 	LEFT JOIN post_view AS pv ON DATE_TRUNC('month', created_at) = months.month
@@ -432,7 +425,7 @@ ORDER BY 1 ASC`
 SELECT
 	months.month AS DATE,
 	TO_CHAR(months.month, 'Mon YY') AS LABEL,
-	COUNT(pv.id)::INT
+	COUNT(pv.id)::INT as count
 FROM
 	months
 	LEFT JOIN post_view AS pv ON DATE_TRUNC('month', created_at) = date_trunc('month', months.month)
@@ -461,10 +454,6 @@ from data`
           date: Date
           label: string
           count: number
-          posts?: {
-            title: string
-            slug: string
-          }[]
         }[] = await db.execute(chartQuery)
 
         const gridColor = '#1e293b'
