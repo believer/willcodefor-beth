@@ -183,7 +183,11 @@ export default function (app: Elysia) {
             .from(postView)
             .where(eq(postView.postId, params.id))
 
-          return html(<span>{stats.count}</span>)
+          return html(
+            <a href="/stats" hx-boost="false" class="text-inherit">
+              {stats.count}
+            </a>
+          )
         },
         { params: t.Object({ id: t.Numeric() }) }
       )

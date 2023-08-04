@@ -82,7 +82,10 @@ export function Home({ latestPosts }: Props) {
             ))}
           </ol>
 
-          <div class="mt-4 flex justify-end">
+          <div class="mt-4 flex gap-4 justify-end">
+            <a href="/stats" hx-boost="false">
+              Stats
+            </a>
             <a href="feed.xml" hx-boost="false">
               Feed
             </a>
