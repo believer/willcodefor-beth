@@ -84,6 +84,7 @@ export default function (app: Elysia) {
               createdAt: post.createdAt,
               id: post.id,
               updatedAt: post.updatedAt,
+              tilId: post.tilId,
             })
             .from(postView)
             .innerJoin(post, eq(post.id, postView.postId))
@@ -127,6 +128,7 @@ export default function (app: Elysia) {
             createdAt: post.createdAt,
             id: post.id,
             updatedAt: post.updatedAt,
+            tilId: post.tilId,
           })
           .from(postView)
           .innerJoin(post, eq(post.id, postView.postId))

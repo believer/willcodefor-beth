@@ -7,6 +7,7 @@ import PostList, { Sort } from './postList'
 type Props = {
   sort?: Sort
   posts: (Pick<Post, 'slug' | 'title' | 'id' | 'createdAt' | 'updatedAt'> & {
+    tilId: number
     views?: number
   })[]
   search?: string

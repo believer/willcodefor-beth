@@ -10,6 +10,7 @@ type Props = {
   page?: number
   posts: (Pick<Post, 'slug' | 'title' | 'id' | 'createdAt' | 'updatedAt'> & {
     views?: number
+    tilId: number
   })[]
 }
 
@@ -36,7 +37,7 @@ export default function PostList({
         return (
           <li
             class="til-counter grid-post relative grid w-full items-baseline gap-4 sm:inline-flex sm:gap-5"
-            data-til={post.id}
+            data-til={post.tilId}
           >
             <a href={`/posts/${post.slug}`}>{post.title}</a>
             <hr class="m-0 hidden flex-1 border-dashed border-gray-300 dark:border-gray-600 sm:block" />

@@ -1,6 +1,6 @@
 import html from '@elysiajs/html'
 import elements from '@kitajs/html'
-import { and, desc, eq, like } from 'drizzle-orm'
+import { and, desc, eq, like, sql } from 'drizzle-orm'
 import Elysia from 'elysia'
 import { Home } from '../components/home'
 import { db } from '../db'
@@ -16,6 +16,7 @@ export default function (app: Elysia) {
           id: post.id,
           slug: post.slug,
           title: post.title,
+          tilId: post.tilId,
         })
         .from(post)
         .orderBy(desc(post.id))

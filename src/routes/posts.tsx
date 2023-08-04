@@ -21,6 +21,7 @@ export default function (app: Elysia) {
             slug: post.slug,
             title: post.title,
             id: post.id,
+            tilId: post.tilId,
           }
 
           // TODO: Handle search and sort
