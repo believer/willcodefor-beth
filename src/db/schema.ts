@@ -45,7 +45,6 @@ export const post = pgTable(
       .defaultNow()
       .notNull(),
     id: serial('id').primaryKey().notNull(),
-    language: text('language').default('en').notNull(),
     longSlug: text('long_slug').notNull(),
     published: boolean('published').default(false).notNull(),
   },
