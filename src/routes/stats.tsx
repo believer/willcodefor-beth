@@ -120,7 +120,9 @@ export default function (app: Elysia) {
                       hx-get={`/stats/total-views?time=${query.time}`}
                       hx-swap="outerHTML"
                     >
-                      0
+                      <span class="text-gray-500 font-thin tabular-nums">
+                        -----
+                      </span>
                     </span>
                     <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
                       Total views
@@ -131,7 +133,9 @@ export default function (app: Elysia) {
                         hx-trigger="load"
                         hx-get="/stats/average-views"
                       >
-                        0
+                        <span class="text-gray-500 font-thin tabular-nums">
+                          -----
+                        </span>
                       </span>
                       <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
                         Views per day (average)
