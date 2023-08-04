@@ -8,16 +8,93 @@ import { BaseHtml } from '../components/layout'
 import PostList from '../components/postList'
 import { db } from '../db'
 import { postView, post } from '../db/schema'
+import clsx from 'clsx'
+
+const timeToSql = (time: string) => {
+  switch (time) {
+    case 'week':
+      return sql`date_trunc('week', CURRENT_DATE)`
+    case 'thirty-days':
+      return sql`CURRENT_DATE - '30 days'::interval`
+    case 'this-year':
+      return sql`date_trunc('year', CURRENT_DATE)`
+    case 'all-time':
+      return sql`(SELECT min(${postView.createdAt}) from ${postView})`
+    default:
+      return sql`CURRENT_DATE`
+  }
+}
 
 export default function (app: Elysia) {
   return app.use(html()).group('/stats', (app) =>
     app
-      .get('', async ({ html }) => {
+      .get('', async ({ html, query }) => {
         return html(
           <BaseHtml noHeader>
+            <div class="flex gap-4 mt-4 items-center justify-center">
+              <a
+                class={clsx(
+                  'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
+                  {
+                    'bg-brandBlue-800': !query.time || query.time === 'today',
+                  }
+                )}
+                href="/stats?time=today"
+              >
+                Today
+              </a>
+              <a
+                class={clsx(
+                  'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
+                  {
+                    'bg-brandBlue-800': query.time === 'week',
+                  }
+                )}
+                href="/stats?time=week"
+              >
+                Week
+              </a>
+              <a
+                class={clsx(
+                  'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
+                  {
+                    'bg-brandBlue-800': query.time === 'thirty-days',
+                  }
+                )}
+                href="/stats?time=thirty-days"
+              >
+                30 days
+              </a>
+              <a
+                class={clsx(
+                  'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
+                  {
+                    'bg-brandBlue-800': query.time === 'this-year',
+                  }
+                )}
+                href="/stats?time=this-year"
+              >
+                This year
+              </a>
+              <a
+                class={clsx(
+                  'py-2 px-4 block bg-gray-800 rounded text-brandBlue-200 no-underline',
+                  {
+                    'bg-brandBlue-800': query.time === 'all-time',
+                  }
+                )}
+                href="/stats?time=all-time"
+              >
+                All time
+              </a>
+            </div>
+            <hr class="my-10" />
             <div class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
               <div class="flex flex-col items-center justify-center text-center text-8xl font-bold">
-                <span hx-trigger="load" hx-get="/stats/total-views">
+                <span
+                  hx-trigger="load"
+                  hx-get={`/stats/total-views?time=${query.time}`}
+                >
                   0
                 </span>
                 <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
@@ -25,11 +102,6 @@ export default function (app: Elysia) {
                 </div>
               </div>
             </div>
-            <div
-              class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2"
-              hx-get="/stats/user-agent"
-              hx-trigger="load"
-            />
             <div class="mb-10">
               <h3 class="mb-4 font-semibold uppercase text-gray-500">
                 Most viewed
@@ -51,15 +123,21 @@ export default function (app: Elysia) {
                 hx-swap="outerHTML"
               />
             </div>
+            <div
+              class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2"
+              hx-get={`/stats/user-agent?time=${query.time}`}
+              hx-trigger="load"
+            />
           </BaseHtml>
         )
       })
-      .get('/total-views', async ({ html }) => {
+      .get('/total-views', async ({ html, query }) => {
         const [{ totalViews }] = await db
           .select({
             totalViews: sql<number>`COUNT(id)`,
           })
           .from(postView)
+          .where(gte(postView.createdAt, timeToSql(query.time)))
 
         return html(<div>{totalViews}</div>)
       })
@@ -138,13 +216,13 @@ export default function (app: Elysia) {
 
         return html(<PostList posts={data} sort="views" />)
       })
-      .get('/user-agent', async ({ html }) => {
+      .get('/user-agent', async ({ html, query }) => {
         const data = await db
           .select({
             userAgent: postView.userAgent,
           })
           .from(postView)
-          .where(gt(postView.createdAt, sql`CURRENT_DATE`))
+          .where(gt(postView.createdAt, timeToSql(query.time)))
 
         let os: Record<string, number> = {}
         let browser: Record<string, number> = {}
