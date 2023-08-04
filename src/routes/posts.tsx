@@ -152,7 +152,7 @@ export default function (app: Elysia) {
         '/stats/:id',
         async ({ html, params, headers }) => {
           const isProduction = process.env.NODE_ENV === 'production'
-          const userAgent: string | undefined = headers['user-agent']
+          const userAgent = headers['user-agent']
 
           // Update views
           if (isProduction && userAgent) {
