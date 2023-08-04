@@ -1,8 +1,8 @@
 const dateFormatter = (options?: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat('sv-SE', { timeZone: 'CET', ...options })
+  new Intl.DateTimeFormat('en-US', { timeZone: 'CET', ...options })
 
 const numberFormatter = (options?: Intl.NumberFormatOptions) =>
-  new Intl.NumberFormat('sv-SE', options)
+  new Intl.NumberFormat('en-US', options)
 
 export const formatDate = (date: string) =>
   dateFormatter().format(new Date(date))
