@@ -20,6 +20,7 @@
     "clsx": "2.0.0",
     "drizzle-orm": "0.27.2",
     "elysia": "0.5.25",
+    "isbot": "^3.6.13",
     "markdown-it": "13.0.1",
     "markdown-it-anchor": "8.6.7",
     "markdown-it-highlightjs": "4.0.1",

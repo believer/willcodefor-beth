@@ -1,4 +1,5 @@
 import { html } from '@elysiajs/html'
+import userAgentParser from 'ua-parser-js'
 import elements from '@kitajs/html'
 import { and, desc, eq, like, or, sql } from 'drizzle-orm'
 import { Elysia, t } from 'elysia'
@@ -6,8 +7,9 @@ import { Post } from '../components/post'
 import { Posts } from '../components/posts'
 import { Series } from '../components/series'
 import { db } from '../db'
-import { postView, post } from '../db/schema'
+import { postView, post, PostView } from '../db/schema'
 import { BaseHtml } from '../components/layout'
+import isbot from 'isbot'
 
 export default function (app: Elysia) {
   return app.use(html()).group('/posts', (app) =>
@@ -150,14 +152,27 @@ export default function (app: Elysia) {
         '/stats/:id',
         async ({ html, params, headers }) => {
           const isProduction = process.env.NODE_ENV === 'production'
-          const isGoogleBot = headers['user-agent']?.includes('Googlebot')
+          const userAgent: string | undefined = headers['user-agent']
 
           // Update views
-          if (isProduction && headers['user-agent'] && !isGoogleBot) {
+          if (isProduction && userAgent) {
+            const ua = userAgentParser(userAgent)
+
             await db.insert(postView).values({
+              userAgent,
               postId: params.id,
-              userAgent: headers['user-agent'],
-            })
+              isBot: isbot(userAgent),
+              browserName: ua.browser.name,
+              browserVersion: ua.browser.version,
+              engineName: ua.engine.name,
+              engineVersion: ua.engine.version,
+              osName: ua.os.name,
+              osVersion: ua.os.version,
+              deviceVendor: ua.device.vendor,
+              deviceModel: ua.device.model,
+              deviceType: ua.device.type,
+              cpuArchitecture: ua.cpu.architecture,
+            } as PostView)
           }
 
           // Get views
@@ -170,7 +185,7 @@ export default function (app: Elysia) {
 
           return html(<span>{stats.count}</span>)
         },
-        { params: t.Object({ id: t.String() }) }
+        { params: t.Object({ id: t.Numeric() }) }
       )
       .get(
         '/next/:id',

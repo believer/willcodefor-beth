@@ -4,7 +4,6 @@ import {
   index,
   integer,
   pgTable,
-  serial,
   text,
   timestamp,
   unique,
@@ -13,15 +12,27 @@ import {
 export const postView = pgTable(
   'post_view',
   {
-    id: serial('id').primaryKey().notNull(),
+    id: integer('id').primaryKey().notNull(),
     createdAt: timestamp('created_at', { precision: 3, mode: 'string' })
       .defaultNow()
       .notNull(),
-    userAgent: text('user_agent').notNull(),
     postId: integer('post_id')
       .default(0)
       .notNull()
       .references(() => post.id),
+    // User Agent Parser fields
+    userAgent: text('user_agent').notNull(),
+    browserName: text('browser_name'),
+    browserVersion: text('browser_version'),
+    engineName: text('engine_name'),
+    engineVersion: text('engine_version'),
+    osName: text('os_name'),
+    osVersion: text('os_version'),
+    deviceVendor: text('device_vendor'),
+    deviceModel: text('device_model'),
+    deviceType: text('device_type'),
+    cpuArchitecture: text('cpu_architecture'),
+    isBot: boolean('is_bot').default(false).notNull(),
   },
   (table) => {
     return {
@@ -44,7 +55,7 @@ export const post = pgTable(
     updatedAt: timestamp('updated_at', { precision: 3, mode: 'string' })
       .defaultNow()
       .notNull(),
-    id: serial('id').primaryKey().notNull(),
+    id: integer('id').primaryKey().notNull(),
     longSlug: text('long_slug').notNull(),
     published: boolean('published').default(false).notNull(),
     // til_id is updated by a trigger that sets the value
