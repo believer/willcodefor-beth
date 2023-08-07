@@ -114,13 +114,12 @@ export default function (app: Elysia) {
                 </TimeButton>
               </div>
               <hr class="my-10" />
-              <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 items-start">
+              <div class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2 items-start">
                 <div class="text-center text-8xl font-bold space-y-8">
                   <div>
                     <div
                       hx-trigger="load"
                       hx-get={`/stats/total-views?time=${query.time}`}
-                      hx-swap="outerHTML"
                     >
                       <span class="text-gray-500 font-thin tabular-nums">
                         -----
@@ -189,7 +188,7 @@ export default function (app: Elysia) {
       )
       .get(
         '/total-views',
-        async ({ html, query }) => {
+        async ({ query }) => {
           const [{ totalViews }] = await db
             .select({
               totalViews: sql<number>`COUNT(id)`,
@@ -202,7 +201,7 @@ export default function (app: Elysia) {
               )
             )
 
-          return html(<div>{totalViews}</div>)
+          return totalViews
         },
         {
           query: t.Object({
@@ -285,7 +284,7 @@ export default function (app: Elysia) {
             .select({
               browserName: postView.browserName,
               osName: postView.osName,
-              count: sql<number>`COUNT(*)`,
+              count: sql<number>`COUNT(*)::int`,
               percent: sql<number>`COUNT(*) / SUM(COUNT(*)) OVER()`.as(
                 'percent'
               ),
@@ -299,6 +298,10 @@ export default function (app: Elysia) {
             )
             .groupBy(postView.browserName, postView.osName)
             .orderBy(sql`count DESC`)
+
+          const lessThanOnePercent = data
+            .filter(({ percent }) => percent < 0.01)
+            .reduce((acc, { count }) => acc + count, 0)
 
           return html(
             <div>
@@ -322,8 +325,8 @@ export default function (app: Elysia) {
                   ))}
               </ul>
               <div class="mt-2 text-xs text-gray-700 text-right">
-                User agents with less than 1% of total are omitted.
-                <br />
+                User agents with less than 1% of total are omitted (
+                {lessThanOnePercent} views) <br />
                 Also,{' '}
                 <span
                   hx-trigger="load"
@@ -361,11 +364,12 @@ export default function (app: Elysia) {
 SELECT
 	days.hour as date,
   to_char(days.hour, 'HH24:MI') as label,
-  count(pv.id)::int as count
+  count(pv.id)::int as count,
+  pv.is_bot as "isBot"
 FROM days
 LEFT JOIN post_view AS pv ON DATE_TRUNC('hour', created_at) = days.hour
 LEFT JOIN post AS p ON p.id = pv.post_id
-GROUP BY 1
+GROUP BY 1, pv.is_bot
 ORDER BY 1 ASC`
 
         if (query.time === 'week') {
@@ -376,10 +380,11 @@ ORDER BY 1 ASC`
 SELECT
 	days.day as date,
   to_char(days.day, 'Mon DD') as label,
-  count(pv.id)::int as count
+  count(pv.id)::int as count,
+  pv.is_bot as "isBot"
 FROM days
 LEFT JOIN post_view AS pv ON DATE_TRUNC('day', created_at) = days.day
-GROUP BY 1
+GROUP BY 1, pv.is_bot
 ORDER BY 1 ASC`
         }
 
@@ -392,11 +397,12 @@ ORDER BY 1 ASC`
         SELECT
         	days.day as date,
           to_char(days.day, 'Mon DD') as label,
-          count(pv.id)::int as count
+          count(pv.id)::int as count,
+          pv.is_bot as "isBot"
         FROM days
         LEFT JOIN post_view AS pv ON DATE_TRUNC('day', created_at) = days.day
         WHERE pv.is_bot = false
-        GROUP BY 1
+GROUP BY 1, pv.is_bot
         ORDER BY 1 ASC`
         }
 
@@ -409,11 +415,12 @@ ORDER BY 1 ASC`
 SELECT
   months.month as date,
 	to_char(months.month, 'Mon') as label,
-  COUNT(pv.id)::int as count
+  COUNT(pv.id)::int as count,
+  pv.is_bot as "isBot"
 FROM
 	months
 	LEFT JOIN post_view AS pv ON DATE_TRUNC('month', created_at) = months.month
-GROUP BY 1
+GROUP BY 1, pv.is_bot
 ORDER BY 1 ASC`
         }
 
@@ -454,6 +461,7 @@ from data`
           date: Date
           label: string
           count: number
+          isBot?: boolean
         }[] = await db.execute(chartQuery)
 
         const gridColor = '#1e293b'
@@ -464,7 +472,7 @@ from data`
             datasets: [
               {
                 label: '',
-                data: chart.map((h) => h.count),
+                data: chart.filter(({ isBot }) => !isBot).map((h) => h.count),
                 backgroundColor: '#65bcff',
               },
             ],
