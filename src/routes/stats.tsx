@@ -234,6 +234,7 @@ export default function (app: Elysia) {
             })
             .from(postView)
             .innerJoin(post, eq(post.id, postView.postId))
+            .where(eq(postView.isBot, false))
             .groupBy(post.id)
             .orderBy(sql`count DESC`)
             .offset(10 * (page - 1))
@@ -271,7 +272,12 @@ export default function (app: Elysia) {
           })
           .from(postView)
           .innerJoin(post, eq(post.id, postView.postId))
-          .where(gte(postView.createdAt, sql`CURRENT_DATE`))
+          .where(
+            and(
+              gte(postView.createdAt, sql`CURRENT_DATE`),
+              eq(postView.isBot, false)
+            )
+          )
           .groupBy(post.id)
           .orderBy(sql`count DESC`)
 
