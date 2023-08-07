@@ -3,18 +3,18 @@ import { staticPlugin } from '@elysiajs/static'
 import elements from '@kitajs/html'
 import { Elysia } from 'elysia'
 import Iteam from './components/iteam'
-import indexRoute from './routes'
-import postRoutes from './routes/posts'
-import xmlRoutes from './routes/xml'
-import staticRoutes from './routes/static'
-import adminRoutes from './routes/admin'
-import statsRoutes from './routes/stats'
+import { indexRoutes } from './routes'
+import { postRoutes } from './routes/posts'
+import { xmlRoutes } from './routes/xml'
+import { staticRoutes } from './routes/static'
+import { adminRoutes } from './routes/admin'
+import { statsRoutes } from './routes/stats'
 
 const app = new Elysia()
   .use(html())
   .use(staticPlugin())
   // Home
-  .use(indexRoute)
+  .use(indexRoutes)
   // Post routes
   .use(postRoutes)
   // XML Feeds

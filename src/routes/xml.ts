@@ -71,37 +71,35 @@ function generateSitemap(posts: Pick<Post, 'slug' | 'updatedAt'>[]) {
 </urlset>`
 }
 
-export default function (app: Elysia) {
-  return app
-    .use(xml())
-    .get('/feed.xml', async ({ xml }) => {
-      const data = await db
-        .select({
-          body: post.body,
-          slug: post.slug,
-          title: post.title,
-          updatedAt: post.updatedAt,
-        })
-        .from(post)
-        .orderBy(desc(post.id))
-        .where(eq(post.published, true))
+export const xmlRoutes = new Elysia()
+  .use(xml())
+  .get('/feed.xml', async ({ xml }) => {
+    const data = await db
+      .select({
+        body: post.body,
+        slug: post.slug,
+        title: post.title,
+        updatedAt: post.updatedAt,
+      })
+      .from(post)
+      .orderBy(desc(post.id))
+      .where(eq(post.published, true))
 
-      const feed = generateFeed(data)
+    const feed = generateFeed(data)
 
-      return xml(feed)
-    })
-    .get('/sitemap.xml', async ({ xml }) => {
-      const data = await db
-        .select({
-          slug: post.slug,
-          updatedAt: post.updatedAt,
-        })
-        .from(post)
-        .orderBy(desc(post.id))
-        .where(eq(post.published, true))
+    return xml(feed)
+  })
+  .get('/sitemap.xml', async ({ xml }) => {
+    const data = await db
+      .select({
+        slug: post.slug,
+        updatedAt: post.updatedAt,
+      })
+      .from(post)
+      .orderBy(desc(post.id))
+      .where(eq(post.published, true))
 
-      const sitemap = generateSitemap(data)
+    const sitemap = generateSitemap(data)
 
-      return xml(sitemap)
-    })
-}
+    return xml(sitemap)
+  })
