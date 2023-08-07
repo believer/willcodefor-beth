@@ -41,6 +41,7 @@ export const BaseHtml = ({
           <link rel="icon" href="/public/favicon.ico" type="image/x-icon" />
           <link href="/public/tokyonight.css" rel="stylesheet" />
           <script src="/public/htmx.min.js"></script>
+          <script src="/public/command-menu.js"></script>
         </head>
         <body
           class="bg-white dark:bg-tokyoNight-bg dark:text-gray-200"
@@ -81,11 +82,11 @@ export const BaseHtml = ({
               {children}
             </div>
           </main>
-          <div
-            hx-get="/command-menu/open"
-            hx-trigger="keyup[ctrlKey && key == 'k'] from:body"
-            hx-swap="outerHTML"
-          />
+          <dialog
+            data-command-menu
+            hx-get="/command-menu"
+            hx-trigger="load"
+          ></dialog>
         </body>
       </html>
     )

@@ -10,6 +10,10 @@
   @apply bg-pink-300 dark:bg-pink-600;
 }
 
+dialog::backdrop {
+  @apply fixed inset-0 bg-tokyoNight-bg/80;
+}
+
 @layer base {
   body {
     @apply bg-white dark:bg-tokyoNight-bg dark:text-gray-200;

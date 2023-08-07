@@ -27,7 +27,7 @@ export default function (app: Elysia) {
     })
     .group('/command-menu', (app) =>
       app
-        .get('/open', async ({ html }) => {
+        .get('', async ({ html }) => {
           const data = await db
             .select({
               slug: post.slug,
@@ -43,16 +43,13 @@ export default function (app: Elysia) {
               <div
                 id="command-menu"
                 class="bg-tokyoNight-bg/30 fixed inset-0 flex justify-center items-center"
-                hx-get="/command-menu/close"
-                hx-trigger="keyup[ctrlKey && key == 'k'] from:body, keyup[key == 'Escape'] from:body"
-                hx-swap="outerHTML"
               >
                 <div class="w-[80dvw] md:w-[60dvw] lg:w-[40dvw] rounded shadow-lg bg-tokyoNight-dark p-6 border-gray-800">
                   <input
                     autofocus="true"
                     type="text"
                     name="search"
-                    class="mb-4 block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                    class="mb-4 text-white block w-full rounded-sm border bg-transparent p-2 ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                     placeholder="Search"
                     hx-trigger="keyup changed delay:300ms"
                     hx-get="/command-menu/search"
@@ -117,15 +114,6 @@ export default function (app: Elysia) {
                 </li>
               ))}
             </>
-          )
-        })
-        .get('/close', async ({ html }) => {
-          return html(
-            <div
-              hx-get="/command-menu/open"
-              hx-trigger="keyup[ctrlKey && key == 'k'] from:body"
-              hx-swap="outerHTML"
-            />
           )
         })
     )
