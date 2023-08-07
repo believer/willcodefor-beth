@@ -1,4 +1,4 @@
-import type { InferModel } from 'drizzle-orm'
+import { InferModel, relations } from 'drizzle-orm'
 import {
   boolean,
   index,
@@ -16,10 +16,7 @@ export const postView = pgTable(
     createdAt: timestamp('created_at', { precision: 3, mode: 'string' })
       .defaultNow()
       .notNull(),
-    postId: integer('post_id')
-      .default(0)
-      .notNull()
-      .references(() => post.id),
+    postId: integer('post_id').default(0).notNull(),
     // User Agent Parser fields
     userAgent: text('user_agent').notNull(),
     browserName: text('browser_name'),
@@ -71,6 +68,17 @@ export const post = pgTable(
     }
   }
 )
+
+export const postRelations = relations(post, ({ many }) => ({
+  postViews: many(postView),
+}))
+
+export const postViewRelations = relations(postView, ({ one }) => ({
+  postId: one(post, {
+    fields: [postView.postId],
+    references: [post.id],
+  }),
+}))
 
 export type Post = InferModel<typeof post>
 export type PostView = InferModel<typeof postView>

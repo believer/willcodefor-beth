@@ -232,7 +232,12 @@ export const statsRoutes = new Elysia({ prefix: '/stats' })
     const hasMore = postsWithViews.length > 10 * Number(page)
 
     return html(
-      <PostList posts={data} sort="views" hasMore={hasMore} page={page} />
+      <PostList
+        posts={data}
+        sort="views"
+        hasMore={hasMore}
+        page={Number(page)}
+      />
     )
   })
   .get('/most-viewed-today', async ({ html }) => {
