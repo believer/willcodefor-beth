@@ -1,5 +1,5 @@
 const dateFormatter = (options?: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat('en-US', { timeZone: 'CET', ...options })
+  new Intl.DateTimeFormat('sv-SE', { timeZone: 'CET', ...options })
 
 const numberFormatter = (options?: Intl.NumberFormatOptions) =>
   new Intl.NumberFormat('en-US', options)
