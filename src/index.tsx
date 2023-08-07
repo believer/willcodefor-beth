@@ -7,7 +7,7 @@ import { indexRoutes } from './routes'
 import { postRoutes } from './routes/posts'
 import { xmlRoutes } from './routes/xml'
 import { staticRoutes } from './routes/static'
-import { adminRoutes } from './routes/admin'
+import adminRoutes from './routes/admin'
 import { statsRoutes } from './routes/stats'
 
 const app = new Elysia()
