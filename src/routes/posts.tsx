@@ -10,85 +10,71 @@ import { db } from '../db'
 import { postView, post, PostView } from '../db/schema'
 import { BaseHtml } from '../components/layout'
 import isbot from 'isbot'
+import { Sort } from '../components/postList'
 
 export const postRoutes = new Elysia({ prefix: '/posts' })
   .use(html())
-  .get(
-    '',
-    async ({ html, query }) => {
-      const commonValues = {
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        slug: post.slug,
-        title: post.title,
-        id: post.id,
-        tilId: post.tilId,
-      }
+  .get('', async ({ html, query = {} }) => {
+    const commonValues = {
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      slug: post.slug,
+      title: post.title,
+      id: post.id,
+      tilId: post.tilId,
+    }
 
-      // TODO: Handle search and sort
-      // Handle searches
-      if (query.search) {
-        const data = await db
-          .select(commonValues)
-          .from(post)
-          .where(
-            and(
-              or(
-                like(post.title, `%${query.search}%`),
-                like(post.body, `%${query.search}%`)
-              ),
-              eq(post.published, true)
-            )
-          )
-          .orderBy(desc(post.id))
-
-        return html(<Posts posts={data} search={query.search} />)
-      }
-
-      // Handled view sorting
-      if (query.sort === 'views') {
-        const data = await db
-          .select({
-            ...commonValues,
-            views: sql<number>`COUNT(${postView.id}) as views`,
-          })
-          .from(post)
-          .innerJoin(postView, eq(postView.postId, post.id))
-          .groupBy(post.id)
-          .orderBy(desc(sql`views`))
-          .where(eq(post.published, true))
-
-        return html(<Posts posts={data} sort="views" />)
-      }
-
-      // Handle date sorting
-      let sortOrder = desc(post.id)
-
-      if (query.sort === 'updatedAt') {
-        sortOrder = desc(post.updatedAt)
-      }
-
+    // TODO: Handle search and sort
+    // Handle searches
+    if (query.search) {
       const data = await db
         .select(commonValues)
         .from(post)
-        .orderBy(sortOrder)
-        .where(eq(post.published, true))
+        .where(
+          and(
+            or(
+              like(post.title, `%${query.search}%`),
+              like(post.body, `%${query.search}%`)
+            ),
+            eq(post.published, true)
+          )
+        )
+        .orderBy(desc(post.id))
 
-      return html(<Posts posts={data} sort={query.sort} />)
-    },
-    {
-      query: t.Object({
-        search: t.Optional(t.String()),
-        sort: t.Optional(
-          t.Union([
-            t.Literal('views'),
-            t.Literal('updatedAt'),
-            t.Literal('createdAt'),
-          ])
-        ),
-      }),
+      return html(<Posts posts={data} search={query.search as string} />)
     }
-  )
+
+    // Handled view sorting
+    if (query?.sort === 'views') {
+      const data = await db
+        .select({
+          ...commonValues,
+          views: sql<number>`COUNT(${postView.id}) as views`,
+        })
+        .from(post)
+        .innerJoin(postView, eq(postView.postId, post.id))
+        .groupBy(post.id)
+        .orderBy(desc(sql`views`))
+        .where(and(eq(post.published, true), eq(postView.isBot, false)))
+
+      return html(<Posts posts={data} sort="views" />)
+    }
+
+    // Handle date sorting
+    let sortOrder = desc(post.id)
+
+    if (query?.sort === 'updatedAt') {
+      sortOrder = desc(post.updatedAt)
+    }
+
+    const data = await db
+      .select(commonValues)
+      .from(post)
+      .orderBy(sortOrder)
+      .where(eq(post.published, true))
+
+    return html(<Posts posts={data} sort={query.sort as Sort} />)
+  })
   .get(
     '/:slug',
     async ({ html, params }) => {

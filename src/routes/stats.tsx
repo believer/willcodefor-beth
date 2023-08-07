@@ -59,129 +59,117 @@ const TimeButton = ({
 
 export const statsRoutes = new Elysia({ prefix: '/stats' })
   .use(html())
-  .get(
-    '',
-    async ({ html, query }) => {
-      return html(
-        <BaseHtml
-          noHeader
-          meta={
-            <script
-              src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"
-              integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg=="
-              crossorigin="anonymous"
-              referrerpolicy="no-referrer"
-            ></script>
-          }
-        >
-          <div class="flex gap-4 mt-4 items-center justify-center">
-            <TimeButton
-              isActive={!query.time || query.time === Time.TODAY}
-              time={Time.TODAY}
-            >
-              Today
-            </TimeButton>
-            <TimeButton isActive={query.time === Time.WEEK} time={Time.WEEK}>
-              Week
-            </TimeButton>
-            <TimeButton
-              isActive={query.time === Time.THIRTY_DAYS}
-              time={Time.THIRTY_DAYS}
-            >
-              30 days
-            </TimeButton>
-            <TimeButton
-              isActive={query.time === Time.THIS_YEAR}
-              time={Time.THIS_YEAR}
-            >
-              This year
-            </TimeButton>
-            <TimeButton
-              isActive={query.time === Time.SINCE_START}
-              time={Time.SINCE_START}
-            >
-              Since start
-            </TimeButton>
-            <TimeButton
-              isActive={query.time === Time.CUMULATIVE}
-              time={Time.CUMULATIVE}
-            >
-              Cumulative
-            </TimeButton>
-          </div>
-          <hr class="my-10" />
-          <div class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2 items-start">
-            <div class="text-center text-8xl font-bold space-y-8">
-              <div>
-                <div
-                  hx-trigger="load"
-                  hx-get={`/stats/total-views?time=${query.time}`}
-                >
-                  <span class="text-gray-500 font-thin tabular-nums">
-                    -----
-                  </span>
-                </div>
-                <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
-                  Total views
-                </div>
+  .get('', async ({ html, query = {} }) => {
+    return html(
+      <BaseHtml
+        noHeader
+        meta={
+          <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"
+            integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+          ></script>
+        }
+      >
+        <div class="flex gap-4 mt-4 items-center justify-center">
+          <TimeButton
+            isActive={!query.time || query.time === Time.TODAY}
+            time={Time.TODAY}
+          >
+            Today
+          </TimeButton>
+          <TimeButton isActive={query.time === Time.WEEK} time={Time.WEEK}>
+            Week
+          </TimeButton>
+          <TimeButton
+            isActive={query.time === Time.THIRTY_DAYS}
+            time={Time.THIRTY_DAYS}
+          >
+            30 days
+          </TimeButton>
+          <TimeButton
+            isActive={query.time === Time.THIS_YEAR}
+            time={Time.THIS_YEAR}
+          >
+            This year
+          </TimeButton>
+          <TimeButton
+            isActive={query.time === Time.SINCE_START}
+            time={Time.SINCE_START}
+          >
+            Since start
+          </TimeButton>
+          <TimeButton
+            isActive={query.time === Time.CUMULATIVE}
+            time={Time.CUMULATIVE}
+          >
+            Cumulative
+          </TimeButton>
+        </div>
+        <hr class="my-10" />
+        <div class="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2 items-start">
+          <div class="text-center text-8xl font-bold space-y-8">
+            <div>
+              <div
+                hx-trigger="load"
+                hx-get={`/stats/total-views?time=${query.time}`}
+              >
+                <span class="text-gray-500 font-thin tabular-nums">-----</span>
               </div>
-              <div>
-                <div
-                  hx-swap="outerHTML"
-                  hx-trigger="load"
-                  hx-get="/stats/average-views"
-                >
-                  <span class="text-gray-500 font-thin tabular-nums">
-                    -----
-                  </span>
-                </div>
-                <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
-                  Views per day (average)
-                </div>
+              <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
+                Total views
               </div>
             </div>
-            <div
-              class="mb-10"
-              hx-get={`/stats/user-agent?time=${query.time}`}
-              hx-trigger="load"
-            />
+            <div>
+              <div
+                hx-swap="outerHTML"
+                hx-trigger="load"
+                hx-get="/stats/average-views"
+              >
+                <span class="text-gray-500 font-thin tabular-nums">-----</span>
+              </div>
+              <div class="mt-2 text-sm font-normal uppercase text-gray-600 dark:text-gray-700">
+                Views per day (average)
+              </div>
+            </div>
           </div>
           <div
-            hx-trigger="load"
-            hx-get={`/stats/chart?time=${query.time}`}
             class="mb-10"
-          >
-            <div class="h-[400px]" />
-          </div>
-          <div class="mb-10">
-            <h3 class="mb-4 font-semibold uppercase text-gray-500">
-              Most viewed
-            </h3>
-            <div
-              hx-trigger="load"
-              hx-get="/stats/most-viewed"
-              hx-swap="outerHTML"
-            />
-          </div>
-          <div class="mb-10">
-            <h3 class="mb-4 font-semibold uppercase text-gray-500">
-              Most viewed today
-            </h3>
-            <div
-              hx-trigger="load"
-              hx-get="/stats/most-viewed-today"
-              hx-swap="outerHTML"
-            />
-          </div>
-        </BaseHtml>
-      )
-    },
-    {
-      query: t.Object({
-        time: t.Optional(t.String()),
-      }),
-    }
-  )
+            hx-get={`/stats/user-agent?time=${query.time}`}
+            hx-trigger="load"
+          />
+        </div>
+        <div
+          hx-trigger="load"
+          hx-get={`/stats/chart?time=${query.time}`}
+          class="mb-10"
+        >
+          <div class="h-[400px]" />
+        </div>
+        <div class="mb-10">
+          <h3 class="mb-4 font-semibold uppercase text-gray-500">
+            Most viewed
+          </h3>
+          <div
+            hx-trigger="load"
+            hx-get="/stats/most-viewed"
+            hx-swap="outerHTML"
+          />
+        </div>
+        <div class="mb-10">
+          <h3 class="mb-4 font-semibold uppercase text-gray-500">
+            Most viewed today
+          </h3>
+          <div
+            hx-trigger="load"
+            hx-get="/stats/most-viewed-today"
+            hx-swap="outerHTML"
+          />
+        </div>
+      </BaseHtml>
+    )
+  })
   .get(
     '/total-views',
     async ({ query }) => {
@@ -214,47 +202,39 @@ export const statsRoutes = new Elysia({ prefix: '/stats' })
 
     return html(<div>{viewsPerDay}</div>)
   })
-  .get(
-    '/most-viewed',
-    async ({ html, query }) => {
-      const page = query.page || 1
-      const data = await db
-        .select({
-          views: sql<number>`COUNT(${postView.id}) as count`,
-          title: post.title,
-          slug: post.slug,
-          createdAt: post.createdAt,
-          id: post.id,
-          updatedAt: post.updatedAt,
-          tilId: post.tilId,
-        })
-        .from(postView)
-        .innerJoin(post, eq(post.id, postView.postId))
-        .where(eq(postView.isBot, false))
-        .groupBy(post.id)
-        .orderBy(sql`count DESC`)
-        .offset(10 * (page - 1))
-        .limit(10)
+  .get('/most-viewed', async ({ html, query }) => {
+    const page = query?.page ?? 1
+    const data = await db
+      .select({
+        views: sql<number>`COUNT(${postView.id}) as count`,
+        title: post.title,
+        slug: post.slug,
+        createdAt: post.createdAt,
+        id: post.id,
+        updatedAt: post.updatedAt,
+        tilId: post.tilId,
+      })
+      .from(postView)
+      .innerJoin(post, eq(post.id, postView.postId))
+      .where(eq(postView.isBot, false))
+      .groupBy(post.id)
+      .orderBy(sql`count DESC`)
+      .offset(10 * (Number(page) - 1))
+      .limit(10)
 
-      const postsWithViews = await db
-        .select({
-          postId: postView.postId,
-        })
-        .from(postView)
-        .groupBy(postView.postId)
+    const postsWithViews = await db
+      .select({
+        postId: postView.postId,
+      })
+      .from(postView)
+      .groupBy(postView.postId)
 
-      const hasMore = postsWithViews.length > 10 * page
+    const hasMore = postsWithViews.length > 10 * Number(page)
 
-      return html(
-        <PostList posts={data} sort="views" hasMore={hasMore} page={page} />
-      )
-    },
-    {
-      query: t.Object({
-        page: t.Optional(t.Numeric()),
-      }),
-    }
-  )
+    return html(
+      <PostList posts={data} sort="views" hasMore={hasMore} page={page} />
+    )
+  })
   .get('/most-viewed-today', async ({ html }) => {
     const data = await db
       .select({
