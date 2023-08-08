@@ -1,47 +1,72 @@
-import { html } from '@elysiajs/html'
-import { staticPlugin } from '@elysiajs/static'
-import elements from '@kitajs/html'
-import { Elysia } from 'elysia'
+// import { html } from '@elysiajs/html'
+// import { staticPlugin } from '@elysiajs/static'
+// import elements from '@kitajs/html'
+// import { Elysia } from 'elysia'
+// import Iteam from './components/iteam'
+// import { indexRoutes } from './routes'
+// import { postRoutes } from './routes/posts'
+// import { xmlRoutes } from './routes/xml'
+// import { staticRoutes } from './routes/static'
+// import adminRoutes from './routes/admin'
+// import { statsRoutes } from './routes/stats'
+//
+// const app = new Elysia()
+//   .use(html())
+//   .use(staticPlugin())
+//   // Home
+//   .use(indexRoutes)
+//   // Post routes
+//   .use(postRoutes)
+//   // XML Feeds
+//   .use(xmlRoutes)
+//   // Admin
+//   .use(adminRoutes)
+//   // Stats
+//   .use(statsRoutes)
+//   // Iteam work
+//   .get('/iteam', ({ html }) => html(<Iteam />))
+//   // Static files
+//   .use(staticRoutes)
+//   .get('/:slug', ({ params, set }) => {
+//     // Old post data contains resources that load from the root
+//     // which are now in /public. This checks for the resource
+//     // and returns it if it exists.
+//     const publicFile = Bun.file(`./public/${params.slug}`)
+//
+//     if (publicFile.size > 0) {
+//       return publicFile
+//     }
+//
+//     // This slug is a short link to a post, redirect to it
+//     set.redirect = `/posts/${params.slug}`
+//   })
+//   .listen(3000)
+//
+// console.log(
+//   `Server running at http://${app.server?.hostname}:${app.server?.port}/`
+// )
+//
+import { Hono } from 'hono'
+import { serveStatic } from 'hono/bun'
+import { commandMenuRoute, commandMenuSearchRoute, indexRoute } from './routes'
 import Iteam from './components/iteam'
-import { indexRoutes } from './routes'
-import { postRoutes } from './routes/posts'
-import { xmlRoutes } from './routes/xml'
-import { staticRoutes } from './routes/static'
-import adminRoutes from './routes/admin'
-import { statsRoutes } from './routes/stats'
+import { postsIndex } from './routes/posts'
 
-const app = new Elysia()
-  .use(html())
-  .use(staticPlugin())
-  // Home
-  .use(indexRoutes)
-  // Post routes
-  .use(postRoutes)
-  // XML Feeds
-  .use(xmlRoutes)
-  // Admin
-  .use(adminRoutes)
-  // Stats
-  .use(statsRoutes)
-  // Iteam work
-  .get('/iteam', ({ html }) => html(<Iteam />))
-  // Static files
-  .use(staticRoutes)
-  .get('/:slug', ({ params, set }) => {
-    // Old post data contains resources that load from the root
-    // which are now in /public. This checks for the resource
-    // and returns it if it exists.
-    const publicFile = Bun.file(`./public/${params.slug}`)
+const app = new Hono({
+  strict: false,
+})
 
-    if (publicFile.size > 0) {
-      return publicFile
-    }
+app.use('/public/*', serveStatic())
 
-    // This slug is a short link to a post, redirect to it
-    set.redirect = `/posts/${params.slug}`
-  })
-  .listen(3000)
+app.get('/', indexRoute)
+app.get('/command-menu', commandMenuRoute)
+app.get('/command-menu/search', commandMenuSearchRoute)
 
-console.log(
-  `Server running at http://${app.server?.hostname}:${app.server?.port}/`
-)
+app.get('/posts', postsIndex)
+
+app.get('/iteam', (c) => c.html(<Iteam />))
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+}

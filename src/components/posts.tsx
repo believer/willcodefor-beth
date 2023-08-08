@@ -1,5 +1,4 @@
 import clsx from 'clsx'
-import elements from '@kitajs/html'
 import { Post } from '../db/schema'
 import { BaseHtml } from './layout'
 import PostList, { Sort } from './postList'

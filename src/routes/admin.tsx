@@ -4,7 +4,7 @@ import { desc, eq } from 'drizzle-orm'
 import Elysia, { t } from 'elysia'
 import { BaseHtml } from '../components/layout'
 import { db } from '../db'
-import { Post, post, postTag, tag } from '../db/schema'
+import { post } from '../db/schema'
 import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'
 

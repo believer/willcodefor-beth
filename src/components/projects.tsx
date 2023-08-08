@@ -1,4 +1,3 @@
-import elements from '@kitajs/html'
 import { ExternalLink } from './link'
 
 const projects = [
@@ -53,7 +52,7 @@ const projects = [
   },
 ]
 
-const Projects = () => {
+export function Projects() {
   return (
     <section class="mt-10 grid grid-cols-1 gap-6 md:grid-cols-12">
       <header class="col-span-12 text-gray-600 dark:text-gray-400 md:col-span-2 md:text-right">
@@ -78,7 +77,7 @@ const Projects = () => {
                       </div>
                     ))}
                   </div>
-                  {p.description}
+                  <span dangerouslySetInnerHTML={{ __html: p.description }} />
                 </div>
               </div>
               <div class="mt-4 flex flex-wrap"></div>
@@ -95,5 +94,3 @@ const Projects = () => {
     </section>
   )
 }
-
-export default Projects

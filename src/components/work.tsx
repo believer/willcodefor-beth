@@ -1,4 +1,3 @@
-import elements from '@kitajs/html'
 import { toYear, toYearShort } from '../utils/intl'
 
 const work = [
@@ -45,7 +44,7 @@ const work = [
   },
 ]
 
-const Work = () => {
+export function Work() {
   return (
     <section class="mt-10 grid gap-6 md:grid-cols-12">
       <header class="col-span-12 text-gray-600 dark:text-gray-400 md:col-span-2 md:text-right">
@@ -72,7 +71,7 @@ const Work = () => {
               </span>
             </summary>
             <div class="mb-8 text-sm">
-              {w.description}
+              <span dangerouslySetInnerHTML={{ __html: w.description }} />
               {w.link && (
                 <a class="inline-block" href={w.link}>
                   {w.linkDescription}
@@ -85,5 +84,3 @@ const Work = () => {
     </section>
   )
 }
-
-export default Work
