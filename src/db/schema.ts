@@ -4,6 +4,8 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
+  serial,
   text,
   timestamp,
   unique,
@@ -69,14 +71,46 @@ export const post = pgTable(
   }
 )
 
+export const tag = pgTable('tag', {
+  id: serial('id').primaryKey().notNull(),
+  name: text('name').notNull(),
+})
+
+export const postTag = pgTable(
+  'post_tag',
+  {
+    postId: integer('post_id')
+      .notNull()
+      .references(() => post.id),
+    tagId: integer('tag_id')
+      .notNull()
+      .references(() => tag.id),
+  },
+  (table) => ({
+    pk: primaryKey(table.postId, table.tagId),
+  })
+)
+
 export const postRelations = relations(post, ({ many }) => ({
   postViews: many(postView),
+  tags: many(postTag),
 }))
 
 export const postViewRelations = relations(postView, ({ one }) => ({
   postId: one(post, {
     fields: [postView.postId],
     references: [post.id],
+  }),
+}))
+
+export const postToTagRelations = relations(postTag, ({ one }) => ({
+  post: one(post, {
+    fields: [postTag.postId],
+    references: [post.id],
+  }),
+  tag: one(tag, {
+    fields: [postTag.tagId],
+    references: [tag.id],
   }),
 }))
 

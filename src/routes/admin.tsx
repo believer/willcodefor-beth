@@ -4,7 +4,7 @@ import { desc, eq } from 'drizzle-orm'
 import Elysia, { t } from 'elysia'
 import { BaseHtml } from '../components/layout'
 import { db } from '../db'
-import { Post, post } from '../db/schema'
+import { Post, post, postTag, tag } from '../db/schema'
 import { formatDateTime } from '../utils/intl'
 import { md } from '../utils/markdown'
 
@@ -74,16 +74,29 @@ export default function (app: Elysia) {
             published: false,
             series: null,
             slug: params.slug,
+            tags: [],
             title: '',
-          } as Post
+            updatedAt: new Date().toISOString(),
+          }
 
           const isNewPost = params.slug === 'new'
 
           if (!isNewPost) {
-            ;[postData] = await db
-              .select()
-              .from(post)
-              .where(eq(post.slug, params.slug))
+            postData = (await db.query.post.findFirst({
+              where: (post) => eq(post.slug, params.slug),
+              with: {
+                tags: {
+                  columns: {},
+                  with: {
+                    tag: {
+                      columns: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            })) as any
           }
 
           const isDraft = !isNewPost && !postData.published
@@ -114,8 +127,15 @@ export default function (app: Elysia) {
                 }
                 hx-target={!isNewPost ? '#update-time' : undefined}
               >
+                <ul class="flex gap-2 mt-8">
+                  {postData.tags.map(({ tag: { name } }) => (
+                    <li class="bg-gray-800 rounded-full px-3 py-1 text-sm font-semibold text-gray-500">
+                      {name}
+                    </li>
+                  ))}
+                </ul>
                 <input
-                  class="my-8 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
+                  class="mt-2 mb-8 block w-full rounded-sm border bg-transparent p-2 text-2xl ring-blue-700 focus:outline-none focus:ring-2 dark:border-gray-800 dark:ring-offset-gray-900"
                   type="text"
                   name="title"
                   value={postData.title}
